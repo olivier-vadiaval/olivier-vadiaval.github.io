@@ -1,0 +1,2261 @@
+<!DOCTYPE HTML>
+<!--
+	Editorial by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+	<head>
+		<title>CO2 & GHG Emissions Analysis</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="../assets/css/main.css" />
+		<link rel="icon" type="image/x-icon" href="../images/favicon.png" />
+	</head>
+	<body class="is-preload">
+
+		<!-- Wrapper -->
+			<div id="wrapper">
+
+				<!-- Main -->
+					<div id="main">
+						<div class="inner">
+
+							<!-- Header -->
+							<header id="header">
+								<a href="../index.html" class="logo"><strong>Olivier's Portfolio</strong></a>
+								<ul class="icons">
+									<li><a href="https://www.linkedin.com/in/olivier-vadiavaloo" class="icon brands fa-linkedin" target="_blank"><span class="label">Linkedin</span></a></li>
+									<li><a href="https://github.com/olivier-vadiaval" class="icon brands fa-github" target="_blank"><span class="label">Github</span></a></li>
+									<li><a href="mailto: olivieryannick5@gmail.com" class="icon brands fa-google"><span class="label">Email</span class="label"></a></li>
+									<li><a href="https://www.kaggle.com/oliviervadiavaloo" class="icon brands fa-kaggle" target="_blank"><span class="label">Kaggle</span></a></li>
+								</ul>
+							</header>
+
+							<!-- Content -->
+								<section>
+									<header class="main">
+										<h1>CO<sub>2</sub> &amp; Greenhouse Gas Emissions Data Analysis</h1>
+									</header>
+
+									<span class="image main">
+										<figure id="opening-img">
+											<img src="https://user-images.githubusercontent.com/59672031/170327165-0c6f054f-0bd6-4a08-9cca-1af580a68691.png"
+											alt="CO2 Emission Project" />
+											<figcaption><br>Image: CO<sub>2</sub> &amp; Greenhouse Gas Emissions Dashboard, created using Power BI</figcaption>
+										</figure>
+									</span>
+
+									<p>
+										<strong>Technologies used:</strong> SQL Server (T-SQL), Excel, Power BI
+										<br>
+										<strong>Dashboard File:</strong> <a href="https://github.com/olivier-vadiaval/co2-emission-T-SQL/raw/main/CO2_Emissions_Dashboard.pbix">CO2_Emissions_Dashboard.pbix</a>
+										<br>
+										<strong>Dataset:</strong> <a href="https://github.com/olivier-vadiaval/co2-emission-T-SQL/raw/main/CO2-Emissions-DB.xlsx">CO2-Emissions-DB.xlsx</a>
+										<br>
+										<strong>T-SQL Queries:</strong> <a href="https://github.com/olivier-vadiaval/co2-emission-T-SQL/blob/main/CO2_Emissions_Queries_1.sql" target="_blank">CO2_Emissions_Queries_1.sql</a>
+										<br>
+										<strong>Github:</strong> <a href="https://github.com/olivier-vadiaval/co2-emission-T-SQL" target="_blank">co2-emission-T-SQL</a>
+										<br>
+									</p>
+									<p>
+										Needless to say that climate change and global warming are major concerns for the world - ever more so today. 
+										CO<sub>2</sub> and Greenhouse gas emissions - explained very briefly - trap the solar radiation bounced off 
+										the Earth's surface, causing the planet to get warmer.
+									</p>
+									<p>
+										In this project, I cleaned, analyzed and visualized a dataset (source: <a href="https://ourworldindata.org/" target="_blank">Our World In Data</a>) 
+										about CO<sub>2</sub> and Greenhouse Gas (GHG) emissions from every country from 1750 to 2020.
+									</p>
+									<p>
+										I utilized Microsoft Excel to clean and break down the data into 5 tables:
+										<ul style="margin: 0; padding-left: 3em;">
+											<li>ContinentsCO2EmissionsPerYear</li>	
+											<li>CountriesCO2EmissionsPerYear</li>
+											<li>CountriesEnergyConsumption</li>
+											<li>CountriesOtherEmissions</li>
+											<li>CountryCO2EmissionPerSourceType</li>
+										</ul>
+										<br>
+										I also added to the dataset the population size of each country from 1750 to 2020. The tables 
+										were loaded into SQL Server and analyzed using T-SQL queries. Finally, I created a dashboard (<a href="#opening-img">see above</a>)
+										in Microsoft Power BI to visualize essential parts of the data.
+									</p>
+
+									<hr class="major" />
+
+									<h2>Some queries...</h2>
+									<p>
+										See the full list of queries <a href="https://github.com/olivier-vadiaval/co2-emission-T-SQL/blob/main/CO2_Emissions_Queries_1.sql" target="_blank">here</a>.
+									</p>
+									<h4>Finding the year with most CO<sub>2</sub> emission for each emission source type.</h4>
+									<p>
+										<strong>Input:</strong>
+										<div style="height: 30em; overflow: auto;">
+<pre>
+<code>WITH sum_src_emission AS (
+SELECT year AS [Year],
+	SUM(coal_co2) AS coal_co2,
+	SUM(cement_co2) AS cement_co2,
+	SUM(flaring_co2) AS flaring_co2,
+	SUM(gas_co2) AS gas_co2,
+	SUM(oil_co2) AS oil_co2,
+	SUM(other_industry_co2) AS other_industry_co2
+FROM CO2EmissionsDB..CountryCO2EmissionPerSourceType
+GROUP BY [Year]
+),
+unpivoted_src_emission AS (
+	SELECT *
+	FROM (
+			SELECT *
+			FROM sum_src_emission
+		) AS a
+		UNPIVOT (
+			SourceCO2Emission FOR Sources IN (
+				coal_co2,
+				cement_co2,
+				flaring_co2,
+				gas_co2,
+				oil_co2,
+				other_industry_co2
+			)
+		) AS p
+),
+emission_group_by_yr_source  AS (
+	SELECT Sources,
+		MAX(SourceCO2Emission) AS MaxSrcCO2Emission
+	FROM unpivoted_src_emission
+	GROUP BY Sources
+)
+SELECT unpivotedTable.[Year],
+	unpivotedTable.SourceCO2Emission AS [Source CO2 Emission],
+	SUBSTRING(REPLACE(unpivotedTable.Sources, '_', ' '), 1, LEN(unpivotedTable.Sources) - 4) AS [Source]
+FROM emission_group_by_yr_source maxEmission
+	INNER JOIN unpivoted_src_emission unpivotedTable
+	ON maxEmission.Sources = unpivotedTable.Sources AND
+	maxEmission.MaxSrcCO2Emission = unpivotedTable.SourceCO2Emission</code>
+</pre>
+										</div>
+										<br>
+										<strong>Output:</strong>
+									</p>
+									<table>
+										<tr>
+											<td>Year</td>
+											<td>Source CO<sub>2</sub> Emission (in million tonnes)</td>
+											<td>Source </td>
+										</tr>
+										<tr>
+											<td>2019</td>
+											<td>7562.807</td>
+											<td>gas </td>
+										</tr>
+										<tr>
+											<td>2019</td>
+											<td>11002.896</td>
+											<td>oil </td>
+										</tr>
+										<tr>
+											<td>2014</td>
+											<td>15064.781</td>
+											<td>coal </td>
+										</tr>
+										<tr>
+											<td>2014</td>
+											<td>304.664</td>
+											<td>other industry </td>
+										</tr>
+										<tr>
+											<td>2020</td>
+											<td>1626.533</td>
+											<td>cement </td>
+										</tr>
+										<tr>
+											<td>2020</td>
+											<td>436.052</td>
+											<td>flaring</td>
+										</tr>
+									</table>
+									<br>
+									<p>
+										&bullet; The most CO<sub>2</sub> emission for each source type happened after 2010. &#129300; 
+										<br>
+										&bullet; Coal had the <strong>highest</strong> maximum CO<sub>2</sub> emission (~15k million tonnes) out of all source types in the
+										dataset.
+									</p>
+									
+									<hr class="major" />
+
+									<h4>Finding the top 10 countries with highest CO<sub>2</sub> emission per capita in 2011.</h4>
+									<p>
+										<strong>Input:</strong>
+<pre>
+<code>SELECT TOP(10) country AS Country,
+	   MAX([co2_per_capita]) AS [CO2 Per Capita]
+FROM CO2EmissionsDB..CountriesCO2EmissionsPerYear
+WHERE co2 IS NOT NULL AND
+	  year = 2011 AND
+	  gdp IS NOT NULL
+GROUP BY country
+ORDER BY [CO2 Per Capita] DESC</code>
+</pre>
+										<strong>Output:</strong>
+									</p>
+									<table>
+										<tr>
+											<td>Country</td>
+											<td>CO2 Per Capita </td>
+										</tr>
+										<tr>
+											<td>Qatar</td>
+											<td>39.122 </td>
+										</tr>
+										<tr>
+											<td>Trinidad and Tobago</td>
+											<td>34.936 </td>
+										</tr>
+										<tr>
+											<td>Kuwait</td>
+											<td>27.229 </td>
+										</tr>
+										<tr>
+											<td>Bahrain</td>
+											<td>22.272 </td>
+										</tr>
+										<tr>
+											<td>United Arab Emirates</td>
+											<td>21.571 </td>
+										</tr>
+										<tr>
+											<td>Luxembourg</td>
+											<td>21.379 </td>
+										</tr>
+										<tr>
+											<td>United States</td>
+											<td>17.781 </td>
+										</tr>
+										<tr>
+											<td>Saudi Arabia</td>
+											<td>17.605 </td>
+										</tr>
+										<tr>
+											<td>Canada</td>
+											<td>16.499 </td>
+										</tr>
+										<tr>
+											<td>Oman</td>
+											<td>16.448</td>
+										</tr>
+									</table>
+
+									<p>
+										&bullet; Recall that <strong>Qatar</strong> was - and still is at the time of writing - 
+										the largest <strong>Liquefied Natural Gas (LNG)</strong> producer in 2011 and has a 
+										fairly small population compared to other countries.
+									</p>
+
+									<hr class="major" />
+
+									<h4>
+										For each country, find the major source of C0<sub>2</sub> emission in the year
+										with their record-high C02 emission
+									</h4>
+
+									<p>
+										<strong>Input:</strong>
+										<div style="height: 30em; overflow: auto;" >
+<pre>
+<code>
+WITH max_co2_per_country AS (
+	SELECT country AS [Country],
+			year AS [Year],
+			co2 AS CO2,
+			MAX(co2) OVER (PARTITION BY country) AS [Max CO2 Emission]
+	FROM CO2EmissionsDB..CountriesCO2EmissionsPerYear
+	WHERE co2 IS NOT NULL
+),
+max_co2_per_country2 AS (
+	SELECT [Country], [Year], [Max CO2 Emission]
+	FROM max_co2_per_country
+	WHERE [MAX CO2 Emission] = co2
+),
+max_co2_shares AS (
+	SELECT perCountry.[Country],
+			perCountry.[Year],
+			perCountry.[Max CO2 Emission],
+			perSrc.coal_co2 / perCountry.[Max CO2 Emission] AS [Coal Share],
+			perSrc.cement_co2 / perCountry.[Max CO2 Emission] AS [Cement Share],
+			perSrc.flaring_co2 / perCountry.[Max CO2 Emission] AS [Flaring Share],
+			perSrc.gas_co2 / perCountry.[Max CO2 Emission] AS [Gas Share],
+			perSrc.oil_co2 / perCountry.[Max CO2 Emission] AS [Oil Share],
+			perSrc.other_industry_co2 / perCountry.[Max CO2 Emission] AS [Other Industry Share]
+	FROM max_co2_per_country2 perCountry
+			INNER JOIN CO2EmissionsDB..CountryCO2EmissionPerSourceType perSrc
+			ON perCountry.[Country] = perSrc.country AND 
+			perCountry.[Year] = perSrc.year
+),
+cross_apply_src_shares AS (
+	SELECT ms.[Country], ms.[Year], ms.[Max CO2 Emission],
+			t.[Source Type], t.[CO2 Emission Share]
+	FROM max_co2_shares ms
+			CROSS APPLY (
+			VALUES
+				('coal', ms.[Coal Share]),
+				('cement', ms.[Cement Share]),
+				('flaring', ms.[Flaring Share]),
+				('Gas', ms.[Gas Share]),
+				('oil', ms.[Oil Share]),
+				('Other Industry', ms.[Other Industry Share])
+			) t ([Source Type], [CO2 Emission Share])
+)
+SELECT c1.[Country], c1.[Year], c1.[Source Type], 
+	   ROUND(c1.[Max CO2 Emission], 3) AS [Max CO2 Emission],
+	   ROUND(c1.[CO2 Emission Share], 3) AS [Source CO2 Emission Share]
+FROM cross_apply_src_shares c1
+WHERE c1.[CO2 Emission Share] = (
+	SELECT MAX(c2.[CO2 Emission Share])
+	FROM cross_apply_src_shares c2
+	WHERE c1.[Country] = c2.[Country]
+)
+</code>
+</pre>
+										</div>
+										<br>
+										<strong>Output:</strong>
+									</p>
+									<div style="height: 30em; overflow: auto;">
+										<table>
+											<tr>
+												<td>Country</td>
+												<td>Year</td>
+												<td>Source Type</td>
+												<td>Max CO2 Emission</td>
+												<td>Source CO2 Emission Share</td>
+											</tr>
+											<tr>
+												<td>Afghanistan</td>
+												<td>2020</td>
+												<td>coal</td>
+												<td>12.16</td>
+												<td>0.617</td>
+											</tr>
+											<tr>
+												<td>Albania</td>
+												<td>1989</td>
+												<td>oil</td>
+												<td>8.977</td>
+												<td>0.456</td>
+											</tr>
+											<tr>
+												<td>Algeria</td>
+												<td>2019</td>
+												<td>Gas</td>
+												<td>166.642</td>
+												<td>0.555</td>
+											</tr>
+											<tr>
+												<td>Andorra</td>
+												<td>2005</td>
+												<td>oil</td>
+												<td>0.575</td>
+												<td>1</td>
+											</tr>
+											<tr>
+												<td>Angola</td>
+												<td>2012</td>
+												<td>oil</td>
+												<td>33.801</td>
+												<td>0.511</td>
+											</tr>
+											<tr>
+												<td>Anguilla</td>
+												<td>2015</td>
+												<td>oil</td>
+												<td>0.154</td>
+												<td>1</td>
+											</tr>
+											<tr>
+												<td>Anguilla</td>
+												<td>2016</td>
+												<td>oil</td>
+												<td>0.154</td>
+												<td>1</td>
+											</tr>
+											<tr>
+												<td>Antigua and Barbuda</td>
+												<td>1969</td>
+												<td>oil</td>
+												<td>1.257</td>
+												<td>1</td>
+											</tr>
+											<tr>
+												<td>Argentina</td>
+												<td>2015</td>
+												<td>Gas</td>
+												<td>192.406</td>
+												<td>0.486</td>
+											</tr>
+											<tr>
+												<td>Armenia</td>
+												<td>1989</td>
+												<td>Gas</td>
+												<td>9.523</td>
+												<td>0.485</td>
+											</tr>
+											<tr>
+												<td>Aruba</td>
+												<td>2007</td>
+												<td>oil</td>
+												<td>2.821</td>
+												<td>1</td>
+											</tr>
+											<tr>
+												<td>Austria</td>
+												<td>2005</td>
+												<td>oil</td>
+												<td>79.068</td>
+												<td>0.498</td>
+											</tr>
+											<tr>
+												<td>Azerbaijan</td>
+												<td>1992</td>
+												<td>oil</td>
+												<td>56.174</td>
+												<td>0.556</td>
+											</tr>
+											<tr>
+												<td>Bahamas</td>
+												<td>1977</td>
+												<td>oil</td>
+												<td>9.709</td>
+												<td>0.996</td>
+											</tr>
+											<tr>
+												<td>Bahrain</td>
+												<td>2020</td>
+												<td>Gas</td>
+												<td>34.96</td>
+												<td>0.882</td>
+											</tr>
+											<tr>
+												<td>Bangladesh</td>
+												<td>2019</td>
+												<td>Gas</td>
+												<td>94.215</td>
+												<td>0.639</td>
+											</tr>
+											<tr>
+												<td>Barbados</td>
+												<td>2008</td>
+												<td>oil</td>
+												<td>1.612</td>
+												<td>0.889</td>
+											</tr>
+											<tr>
+												<td>Belarus</td>
+												<td>1986</td>
+												<td>oil</td>
+												<td>121.013</td>
+												<td>0.778</td>
+											</tr>
+											<tr>
+												<td>Belgium</td>
+												<td>1979</td>
+												<td>oil</td>
+												<td>139.787</td>
+												<td>0.485</td>
+											</tr>
+											<tr>
+												<td>Belize</td>
+												<td>2019</td>
+												<td>oil</td>
+												<td>0.658</td>
+												<td>0.986</td>
+											</tr>
+											<tr>
+												<td>Benin</td>
+												<td>2019</td>
+												<td>oil</td>
+												<td>7.315</td>
+												<td>0.966</td>
+											</tr>
+											<tr>
+												<td>Bermuda</td>
+												<td>1989</td>
+												<td>oil</td>
+												<td>0.78</td>
+												<td>1</td>
+											</tr>
+											<tr>
+												<td>Bhutan</td>
+												<td>2019</td>
+												<td>coal</td>
+												<td>1.927</td>
+												<td>0.502</td>
+											</tr>
+											<tr>
+												<td>Bolivia</td>
+												<td>2018</td>
+												<td>oil</td>
+												<td>23.856</td>
+												<td>0.54</td>
+											</tr>
+											<tr>
+												<td>Bonaire Sint Eustatius and Saba</td>
+												<td>1976</td>
+												<td>oil</td>
+												<td>0.939</td>
+												<td>1</td>
+											</tr>
+											<tr>
+												<td>Bosnia and Herzegovina</td>
+												<td>2019</td>
+												<td>coal</td>
+												<td>24.847</td>
+												<td>0.776</td>
+											</tr>
+											<tr>
+												<td>Botswana</td>
+												<td>2018</td>
+												<td>coal</td>
+												<td>7.561</td>
+												<td>0.612</td>
+											</tr>
+											<tr>
+												<td>Brazil</td>
+												<td>2014</td>
+												<td>oil</td>
+												<td>557.901</td>
+												<td>0.639</td>
+											</tr>
+											<tr>
+												<td>British Virgin Islands</td>
+												<td>2014</td>
+												<td>oil</td>
+												<td>0.213</td>
+												<td>1</td>
+											</tr>
+											<tr>
+												<td>British Virgin Islands</td>
+												<td>2015</td>
+												<td>oil</td>
+												<td>0.213</td>
+												<td>1</td>
+											</tr>
+											<tr>
+												<td>British Virgin Islands</td>
+												<td>2016</td>
+												<td>oil</td>
+												<td>0.213</td>
+												<td>1</td>
+											</tr>
+											<tr>
+												<td>Brunei</td>
+												<td>1949</td>
+												<td>oil</td>
+												<td>11.468</td>
+												<td>0.898</td>
+											</tr>
+											<tr>
+												<td>Bulgaria</td>
+												<td>1987</td>
+												<td>coal</td>
+												<td>91.273</td>
+												<td>0.458</td>
+											</tr>
+											<tr>
+												<td>Burkina Faso</td>
+												<td>2019</td>
+												<td>oil</td>
+												<td>4.336</td>
+												<td>0.972</td>
+											</tr>
+											<tr>
+												<td>Burundi</td>
+												<td>2019</td>
+												<td>oil</td>
+												<td>0.704</td>
+												<td>0.939</td>
+											</tr>
+											<tr>
+												<td>Cambodia</td>
+												<td>2019</td>
+												<td>oil</td>
+												<td>15.329</td>
+												<td>0.487</td>
+											</tr>
+											<tr>
+												<td>Cameroon</td>
+												<td>2018</td>
+												<td>oil</td>
+												<td>7.932</td>
+												<td>0.671</td>
+											</tr>
+											<tr>
+												<td>Canada</td>
+												<td>2007</td>
+												<td>oil</td>
+												<td>594.665</td>
+												<td>0.448</td>
+											</tr>
+											<tr>
+												<td>Cape Verde</td>
+												<td>2011</td>
+												<td>oil</td>
+												<td>0.616</td>
+												<td>1</td>
+											</tr>
+											<tr>
+												<td>Central African Republic</td>
+												<td>1987</td>
+												<td>oil</td>
+												<td>0.26</td>
+												<td>1</td>
+											</tr>
+											<tr>
+												<td>Chad</td>
+												<td>2011</td>
+												<td>oil</td>
+												<td>1.118</td>
+												<td>1</td>
+											</tr>
+											<tr>
+												<td>Chile</td>
+												<td>2019</td>
+												<td>oil</td>
+												<td>86.129</td>
+												<td>0.541</td>
+											</tr>
+											<tr>
+												<td>China</td>
+												<td>2020</td>
+												<td>coal</td>
+												<td>10667.887</td>
+												<td>0.696</td>
+											</tr>
+											<tr>
+												<td>Christmas Island</td>
+												<td>1975</td>
+												<td>oil</td>
+												<td>0.136</td>
+												<td>1</td>
+											</tr>
+											<tr>
+												<td>Colombia</td>
+												<td>2016</td>
+												<td>oil</td>
+												<td>93.242</td>
+												<td>0.488</td>
+											</tr>
+											<tr>
+												<td>Comoros</td>
+												<td>2019</td>
+												<td>oil</td>
+												<td>0.306</td>
+												<td>1</td>
+											</tr>
+											<tr>
+												<td>Congo</td>
+												<td>2016</td>
+												<td>oil</td>
+												<td>3.702</td>
+												<td>0.597</td>
+											</tr>
+											<tr>
+												<td>Cook Islands</td>
+												<td>2019</td>
+												<td>oil</td>
+												<td>0.079</td>
+												<td>1</td>
+											</tr>
+											<tr>
+												<td>Cook Islands</td>
+												<td>2020</td>
+												<td>oil</td>
+												<td>0.079</td>
+												<td>1</td>
+											</tr>
+											<tr>
+												<td>Costa Rica</td>
+												<td>2019</td>
+												<td>oil</td>
+												<td>8.818</td>
+												<td>0.916</td>
+											</tr>
+											<tr>
+												<td>Cote d'Ivoire</td>
+												<td>2017</td>
+												<td>oil</td>
+												<td>11.86</td>
+												<td>0.636</td>
+											</tr>
+											<tr>
+												<td>Croatia</td>
+												<td>2007</td>
+												<td>oil</td>
+												<td>24.866</td>
+												<td>0.543</td>
+											</tr>
+											<tr>
+												<td>Cuba</td>
+												<td>1989</td>
+												<td>oil</td>
+												<td>35.719</td>
+												<td>0.942</td>
+											</tr>
+											<tr>
+												<td>Curacao</td>
+												<td>1976</td>
+												<td>oil</td>
+												<td>17.589</td>
+												<td>1</td>
+											</tr>
+											<tr>
+												<td>Cyprus</td>
+												<td>2008</td>
+												<td>oil</td>
+												<td>8.714</td>
+												<td>0.884</td>
+											</tr>
+											<tr>
+												<td>Czechia</td>
+												<td>1978</td>
+												<td>coal</td>
+												<td>184.394</td>
+												<td>0.759</td>
+											</tr>
+											<tr>
+												<td>Democratic Republic of Congo</td>
+												<td>2014</td>
+												<td>oil</td>
+												<td>4.631</td>
+												<td>0.971</td>
+											</tr>
+											<tr>
+												<td>Denmark</td>
+												<td>1996</td>
+												<td>coal</td>
+												<td>74.852</td>
+												<td>0.469</td>
+											</tr>
+											<tr>
+												<td>Djibouti</td>
+												<td>2013</td>
+												<td>oil</td>
+												<td>0.557</td>
+												<td>0.894</td>
+											</tr>
+											<tr>
+												<td>Dominica</td>
+												<td>2007</td>
+												<td>oil</td>
+												<td>0.183</td>
+												<td>1</td>
+											</tr>
+											<tr>
+												<td>Dominican Republic</td>
+												<td>2020</td>
+												<td>oil</td>
+												<td>27.769</td>
+												<td>0.566</td>
+											</tr>
+											<tr>
+												<td>Ecuador</td>
+												<td>2014</td>
+												<td>oil</td>
+												<td>43.207</td>
+												<td>0.87</td>
+											</tr>
+											<tr>
+												<td>Egypt</td>
+												<td>2017</td>
+												<td>oil</td>
+												<td>250.605</td>
+												<td>0.475</td>
+											</tr>
+											<tr>
+												<td>El Salvador</td>
+												<td>2019</td>
+												<td>oil</td>
+												<td>6.853</td>
+												<td>0.943</td>
+											</tr>
+											<tr>
+												<td>Equatorial Guinea</td>
+												<td>2017</td>
+												<td>Gas</td>
+												<td>12.285</td>
+												<td>0.501</td>
+											</tr>
+											<tr>
+												<td>Eritrea</td>
+												<td>1996</td>
+												<td>oil</td>
+												<td>0.898</td>
+												<td>0.979</td>
+											</tr>
+											<tr>
+												<td>Estonia</td>
+												<td>1989</td>
+												<td>coal</td>
+												<td>38.869</td>
+												<td>0.675</td>
+											</tr>
+											<tr>
+												<td>Eswatini</td>
+												<td>2013</td>
+												<td>oil</td>
+												<td>1.4</td>
+												<td>0.517</td>
+											</tr>
+											<tr>
+												<td>Ethiopia</td>
+												<td>2019</td>
+												<td>oil</td>
+												<td>16.371</td>
+												<td>0.695</td>
+											</tr>
+											<tr>
+												<td>Faeroe Islands</td>
+												<td>2001</td>
+												<td>oil</td>
+												<td>0.762</td>
+												<td>1</td>
+											</tr>
+											<tr>
+												<td>Fiji</td>
+												<td>2020</td>
+												<td>oil</td>
+												<td>1.393</td>
+												<td>0.961</td>
+											</tr>
+											<tr>
+												<td>Finland</td>
+												<td>2003</td>
+												<td>coal</td>
+												<td>72.658</td>
+												<td>0.482</td>
+											</tr>
+											<tr>
+												<td>France</td>
+												<td>1973</td>
+												<td>oil</td>
+												<td>537.407</td>
+												<td>0.679</td>
+											</tr>
+											<tr>
+												<td>French Equatorial Africa</td>
+												<td>1958</td>
+												<td>oil</td>
+												<td>0.429</td>
+												<td>1</td>
+											</tr>
+											<tr>
+												<td>French Guiana</td>
+												<td>1993</td>
+												<td>oil</td>
+												<td>0.859</td>
+												<td>1</td>
+											</tr>
+											<tr>
+												<td>French Polynesia</td>
+												<td>2020</td>
+												<td>oil</td>
+												<td>0.828</td>
+												<td>1</td>
+											</tr>
+											<tr>
+												<td>French West Africa</td>
+												<td>1957</td>
+												<td>oil</td>
+												<td>1.403</td>
+												<td>0.943</td>
+											</tr>
+											<tr>
+												<td>Gabon</td>
+												<td>1978</td>
+												<td>oil</td>
+												<td>7.555</td>
+												<td>0.586</td>
+											</tr>
+											<tr>
+												<td>Gambia</td>
+												<td>2019</td>
+												<td>oil</td>
+												<td>0.547</td>
+												<td>0.993</td>
+											</tr>
+											<tr>
+												<td>Georgia</td>
+												<td>1988</td>
+												<td>Gas</td>
+												<td>16.315</td>
+												<td>0.502</td>
+											</tr>
+											<tr>
+												<td>Germany</td>
+												<td>1979</td>
+												<td>coal</td>
+												<td>1117.888</td>
+												<td>0.491</td>
+											</tr>
+											<tr>
+												<td>Ghana</td>
+												<td>2019</td>
+												<td>oil</td>
+												<td>16.918</td>
+												<td>0.699</td>
+											</tr>
+											<tr>
+												<td>Greece</td>
+												<td>2007</td>
+												<td>oil</td>
+												<td>114.592</td>
+												<td>0.472</td>
+											</tr>
+											<tr>
+												<td>Greenland</td>
+												<td>2011</td>
+												<td>oil</td>
+												<td>0.725</td>
+												<td>1</td>
+											</tr>
+											<tr>
+												<td>Grenada</td>
+												<td>2019</td>
+												<td>oil</td>
+												<td>0.332</td>
+												<td>1</td>
+											</tr>
+											<tr>
+												<td>Guadeloupe</td>
+												<td>2019</td>
+												<td>oil</td>
+												<td>2.562</td>
+												<td>0.817</td>
+											</tr>
+											<tr>
+												<td>Guadeloupe</td>
+												<td>2020</td>
+												<td>oil</td>
+												<td>2.562</td>
+												<td>0.817</td>
+											</tr>
+											<tr>
+												<td>Guatemala</td>
+												<td>2019</td>
+												<td>oil</td>
+												<td>21.934</td>
+												<td>0.618</td>
+											</tr>
+											<tr>
+												<td>Guinea</td>
+												<td>2019</td>
+												<td>oil</td>
+												<td>3.717</td>
+												<td>1</td>
+											</tr>
+											<tr>
+												<td>Guinea-Bissau</td>
+												<td>2019</td>
+												<td>oil</td>
+												<td>0.314</td>
+												<td>1</td>
+											</tr>
+											<tr>
+												<td>Guyana</td>
+												<td>2019</td>
+												<td>oil</td>
+												<td>2.487</td>
+												<td>0.935</td>
+											</tr>
+											<tr>
+												<td>Haiti</td>
+												<td>2018</td>
+												<td>oil</td>
+												<td>3.368</td>
+												<td>0.977</td>
+											</tr>
+											<tr>
+												<td>Honduras</td>
+												<td>2019</td>
+												<td>oil</td>
+												<td>10.789</td>
+												<td>0.929</td>
+											</tr>
+											<tr>
+												<td>Hong Kong</td>
+												<td>2014</td>
+												<td>coal</td>
+												<td>45.492</td>
+												<td>0.678</td>
+											</tr>
+											<tr>
+												<td>Hungary</td>
+												<td>1984</td>
+												<td>coal</td>
+												<td>90.561</td>
+												<td>0.407</td>
+											</tr>
+											<tr>
+												<td>Iceland</td>
+												<td>2008</td>
+												<td>oil</td>
+												<td>3.811</td>
+												<td>0.766</td>
+											</tr>
+											<tr>
+												<td>India</td>
+												<td>2019</td>
+												<td>coal</td>
+												<td>2625.968</td>
+												<td>0.639</td>
+											</tr>
+											<tr>
+												<td>Indonesia</td>
+												<td>2019</td>
+												<td>coal</td>
+												<td>660.594</td>
+												<td>0.477</td>
+											</tr>
+											<tr>
+												<td>Iran</td>
+												<td>2020</td>
+												<td>Gas</td>
+												<td>745.035</td>
+												<td>0.583</td>
+											</tr>
+											<tr>
+												<td>Iraq</td>
+												<td>2019</td>
+												<td>oil</td>
+												<td>222.991</td>
+												<td>0.657</td>
+											</tr>
+											<tr>
+												<td>Ireland</td>
+												<td>2005</td>
+												<td>oil</td>
+												<td>48.156</td>
+												<td>0.535</td>
+											</tr>
+											<tr>
+												<td>Israel</td>
+												<td>2012</td>
+												<td>oil</td>
+												<td>74.785</td>
+												<td>0.47</td>
+											</tr>
+											<tr>
+												<td>Italy</td>
+												<td>2005</td>
+												<td>oil</td>
+												<td>502.26</td>
+												<td>0.477</td>
+											</tr>
+											<tr>
+												<td>Jamaica</td>
+												<td>2006</td>
+												<td>oil</td>
+												<td>11.577</td>
+												<td>0.967</td>
+											</tr>
+											<tr>
+												<td>Japan</td>
+												<td>2013</td>
+												<td>oil</td>
+												<td>1315.343</td>
+												<td>0.412</td>
+											</tr>
+											<tr>
+												<td>Jordan</td>
+												<td>2014</td>
+												<td>oil</td>
+												<td>25.895</td>
+												<td>0.866</td>
+											</tr>
+											<tr>
+												<td>Kazakhstan</td>
+												<td>2018</td>
+												<td>coal</td>
+												<td>317.28</td>
+												<td>0.552</td>
+											</tr>
+											<tr>
+												<td>Kenya</td>
+												<td>2019</td>
+												<td>oil</td>
+												<td>18.347</td>
+												<td>0.796</td>
+											</tr>
+											<tr>
+												<td>Kiribati</td>
+												<td>2019</td>
+												<td>oil</td>
+												<td>0.068</td>
+												<td>1</td>
+											</tr>
+											<tr>
+												<td>Kiribati</td>
+												<td>2020</td>
+												<td>oil</td>
+												<td>0.068</td>
+												<td>1</td>
+											</tr>
+											<tr>
+												<td>Kuwait</td>
+												<td>2016</td>
+												<td>oil</td>
+												<td>100.859</td>
+												<td>0.551</td>
+											</tr>
+											<tr>
+												<td>Kyrgyzstan</td>
+												<td>1985</td>
+												<td>oil</td>
+												<td>22.564</td>
+												<td>0.43</td>
+											</tr>
+											<tr>
+												<td>Laos</td>
+												<td>2019</td>
+												<td>coal</td>
+												<td>33.932</td>
+												<td>0.862</td>
+											</tr>
+											<tr>
+												<td>Latvia</td>
+												<td>1985</td>
+												<td>oil</td>
+												<td>25.687</td>
+												<td>0.714</td>
+											</tr>
+											<tr>
+												<td>Lebanon</td>
+												<td>2017</td>
+												<td>oil</td>
+												<td>27.977</td>
+												<td>0.892</td>
+											</tr>
+											<tr>
+												<td>Leeward Islands</td>
+												<td>1955</td>
+												<td>oil</td>
+												<td>0.033</td>
+												<td>0.879</td>
+											</tr>
+											<tr>
+												<td>Leeward Islands</td>
+												<td>1956</td>
+												<td>oil</td>
+												<td>0.033</td>
+												<td>0.879</td>
+											</tr>
+											<tr>
+												<td>Lesotho</td>
+												<td>2012</td>
+												<td>coal</td>
+												<td>3.092</td>
+												<td>0.808</td>
+											</tr>
+											<tr>
+												<td>Liberia</td>
+												<td>1980</td>
+												<td>oil</td>
+												<td>2.038</td>
+												<td>0.976</td>
+											</tr>
+											<tr>
+												<td>Libya</td>
+												<td>2014</td>
+												<td>oil</td>
+												<td>71.39</td>
+												<td>0.579</td>
+											</tr>
+											<tr>
+												<td>Liechtenstein</td>
+												<td>2006</td>
+												<td>oil</td>
+												<td>0.231</td>
+												<td>0.684</td>
+											</tr>
+											<tr>
+												<td>Lithuania</td>
+												<td>1985</td>
+												<td>oil</td>
+												<td>40.311</td>
+												<td>0.686</td>
+											</tr>
+											<tr>
+												<td>Luxembourg</td>
+												<td>1974</td>
+												<td>coal</td>
+												<td>14.424</td>
+												<td>0.64</td>
+											</tr>
+											<tr>
+												<td>Macao</td>
+												<td>2015</td>
+												<td>oil</td>
+												<td>2.028</td>
+												<td>0.885</td>
+											</tr>
+											<tr>
+												<td>Madagascar</td>
+												<td>2018</td>
+												<td>oil</td>
+												<td>4.167</td>
+												<td>0.624</td>
+											</tr>
+											<tr>
+												<td>Malawi</td>
+												<td>2019</td>
+												<td>oil</td>
+												<td>1.588</td>
+												<td>0.819</td>
+											</tr>
+											<tr>
+												<td>Malaysia</td>
+												<td>2019</td>
+												<td>oil</td>
+												<td>278.659</td>
+												<td>0.313</td>
+											</tr>
+											<tr>
+												<td>Maldives</td>
+												<td>2020</td>
+												<td>oil</td>
+												<td>1.796</td>
+												<td>1</td>
+											</tr>
+											<tr>
+												<td>Mali</td>
+												<td>2019</td>
+												<td>oil</td>
+												<td>3.688</td>
+												<td>0.931</td>
+											</tr>
+											<tr>
+												<td>Malta</td>
+												<td>2003</td>
+												<td>oil</td>
+												<td>2.979</td>
+												<td>1</td>
+											</tr>
+											<tr>
+												<td>Marshall Islands</td>
+												<td>2019</td>
+												<td>oil</td>
+												<td>0.151</td>
+												<td>1</td>
+											</tr>
+											<tr>
+												<td>Marshall Islands</td>
+												<td>2020</td>
+												<td>oil</td>
+												<td>0.151</td>
+												<td>1</td>
+											</tr>
+											<tr>
+												<td>Martinique</td>
+												<td>2005</td>
+												<td>oil</td>
+												<td>2.441</td>
+												<td>1</td>
+											</tr>
+											<tr>
+												<td>Mauritania</td>
+												<td>2019</td>
+												<td>oil</td>
+												<td>3.698</td>
+												<td>1</td>
+											</tr>
+											<tr>
+												<td>Mauritius</td>
+												<td>2017</td>
+												<td>oil</td>
+												<td>4.536</td>
+												<td>0.607</td>
+											</tr>
+											<tr>
+												<td>Mayotte</td>
+												<td>2019</td>
+												<td>oil</td>
+												<td>0.306</td>
+												<td>1</td>
+											</tr>
+											<tr>
+												<td>Mayotte</td>
+												<td>2020</td>
+												<td>oil</td>
+												<td>0.306</td>
+												<td>1</td>
+											</tr>
+											<tr>
+												<td>Mexico</td>
+												<td>2012</td>
+												<td>oil</td>
+												<td>496.3</td>
+												<td>0.585</td>
+											</tr>
+											<tr>
+												<td>Micronesia (country)</td>
+												<td>2020</td>
+												<td>oil</td>
+												<td>0.148</td>
+												<td>1</td>
+											</tr>
+											<tr>
+												<td>Moldova</td>
+												<td>1985</td>
+												<td>oil</td>
+												<td>41.765</td>
+												<td>0.599</td>
+											</tr>
+											<tr>
+												<td>Mongolia</td>
+												<td>2019</td>
+												<td>coal</td>
+												<td>88.691</td>
+												<td>0.946</td>
+											</tr>
+											<tr>
+												<td>Montenegro</td>
+												<td>2019</td>
+												<td>coal</td>
+												<td>2.645</td>
+												<td>0.625</td>
+											</tr>
+											<tr>
+												<td>Montserrat</td>
+												<td>2010</td>
+												<td>oil</td>
+												<td>0.062</td>
+												<td>1</td>
+											</tr>
+											<tr>
+												<td>Morocco</td>
+												<td>2019</td>
+												<td>oil</td>
+												<td>68.217</td>
+												<td>0.534</td>
+											</tr>
+											<tr>
+												<td>Mozambique</td>
+												<td>2017</td>
+												<td>oil</td>
+												<td>8.323</td>
+												<td>0.712</td>
+											</tr>
+											<tr>
+												<td>Myanmar</td>
+												<td>2020</td>
+												<td>oil</td>
+												<td>36.326</td>
+												<td>0.545</td>
+											</tr>
+											<tr>
+												<td>Namibia</td>
+												<td>2017</td>
+												<td>oil</td>
+												<td>4.216</td>
+												<td>0.883</td>
+											</tr>
+											<tr>
+												<td>Nauru</td>
+												<td>1986</td>
+												<td>oil</td>
+												<td>0.161</td>
+												<td>1</td>
+											</tr>
+											<tr>
+												<td>Nepal</td>
+												<td>2019</td>
+												<td>oil</td>
+												<td>16.967</td>
+												<td>0.429</td>
+											</tr>
+											<tr>
+												<td>Netherlands</td>
+												<td>1979</td>
+												<td>oil</td>
+												<td>187.007</td>
+												<td>0.479</td>
+											</tr>
+											<tr>
+												<td>New Caledonia</td>
+												<td>2019</td>
+												<td>coal</td>
+												<td>8.706</td>
+												<td>0.665</td>
+											</tr>
+											<tr>
+												<td>New Zealand</td>
+												<td>2008</td>
+												<td>oil</td>
+												<td>37.713</td>
+												<td>0.5</td>
+											</tr>
+											<tr>
+												<td>Nicaragua</td>
+												<td>2019</td>
+												<td>oil</td>
+												<td>5.673</td>
+												<td>0.938</td>
+											</tr>
+											<tr>
+												<td>Niger</td>
+												<td>2014</td>
+												<td>oil</td>
+												<td>2.075</td>
+												<td>0.809</td>
+											</tr>
+											<tr>
+												<td>Nigeria</td>
+												<td>2019</td>
+												<td>oil</td>
+												<td>130.104</td>
+												<td>0.528</td>
+											</tr>
+											<tr>
+												<td>Niue</td>
+												<td>2014</td>
+												<td>oil</td>
+												<td>0.011</td>
+												<td>1</td>
+											</tr>
+											<tr>
+												<td>Niue</td>
+												<td>2018</td>
+												<td>oil</td>
+												<td>0.011</td>
+												<td>1</td>
+											</tr>
+											<tr>
+												<td>Niue</td>
+												<td>2019</td>
+												<td>oil</td>
+												<td>0.011</td>
+												<td>1</td>
+											</tr>
+											<tr>
+												<td>Niue</td>
+												<td>2020</td>
+												<td>oil</td>
+												<td>0.011</td>
+												<td>1</td>
+											</tr>
+											<tr>
+												<td>North Korea</td>
+												<td>1989</td>
+												<td>coal</td>
+												<td>213.072</td>
+												<td>0.902</td>
+											</tr>
+											<tr>
+												<td>North Macedonia</td>
+												<td>1988</td>
+												<td>coal</td>
+												<td>14.383</td>
+												<td>0.596</td>
+											</tr>
+											<tr>
+												<td>Norway</td>
+												<td>2007</td>
+												<td>oil</td>
+												<td>45.714</td>
+												<td>0.534</td>
+											</tr>
+											<tr>
+												<td>Oceania</td>
+												<td>2019</td>
+												<td>coal</td>
+												<td>471.189</td>
+												<td>0.373</td>
+											</tr>
+											<tr>
+												<td>Oman</td>
+												<td>2017</td>
+												<td>Gas</td>
+												<td>65.906</td>
+												<td>0.721</td>
+											</tr>
+											<tr>
+												<td>Pakistan</td>
+												<td>2018</td>
+												<td>oil</td>
+												<td>238.306</td>
+												<td>0.42</td>
+											</tr>
+											<tr>
+												<td>Palau</td>
+												<td>2007</td>
+												<td>oil</td>
+												<td>0.253</td>
+												<td>1</td>
+											</tr>
+											<tr>
+												<td>Palestine</td>
+												<td>2017</td>
+												<td>oil</td>
+												<td>3.268</td>
+												<td>1</td>
+											</tr>
+											<tr>
+												<td>Panama</td>
+												<td>2019</td>
+												<td>oil</td>
+												<td>12.294</td>
+												<td>0.794</td>
+											</tr>
+											<tr>
+												<td>Papua New Guinea</td>
+												<td>2020</td>
+												<td>oil</td>
+												<td>6.652</td>
+												<td>0.848</td>
+											</tr>
+											<tr>
+												<td>Paraguay</td>
+												<td>2019</td>
+												<td>oil</td>
+												<td>8.525</td>
+												<td>0.951</td>
+											</tr>
+											<tr>
+												<td>Peru</td>
+												<td>2010</td>
+												<td>oil</td>
+												<td>57.173</td>
+												<td>0.406</td>
+											</tr>
+											<tr>
+												<td>Philippines</td>
+												<td>2019</td>
+												<td>coal</td>
+												<td>146.615</td>
+												<td>0.473</td>
+											</tr>
+											<tr>
+												<td>Poland</td>
+												<td>1987</td>
+												<td>coal</td>
+												<td>463.733</td>
+												<td>0.851</td>
+											</tr>
+											<tr>
+												<td>Portugal</td>
+												<td>2002</td>
+												<td>oil</td>
+												<td>69.749</td>
+												<td>0.621</td>
+											</tr>
+											<tr>
+												<td>Puerto Rico</td>
+												<td>1920</td>
+												<td>oil</td>
+												<td>0.209</td>
+												<td>1</td>
+											</tr>
+											<tr>
+												<td>Qatar</td>
+												<td>2019</td>
+												<td>Gas</td>
+												<td>115.037</td>
+												<td>0.822</td>
+											</tr>
+											<tr>
+												<td>Reunion</td>
+												<td>2019</td>
+												<td>oil</td>
+												<td>4.588</td>
+												<td>0.541</td>
+											</tr>
+											<tr>
+												<td>Reunion</td>
+												<td>2020</td>
+												<td>oil</td>
+												<td>4.588</td>
+												<td>0.541</td>
+											</tr>
+											<tr>
+												<td>Romania</td>
+												<td>1989</td>
+												<td>coal</td>
+												<td>213.599</td>
+												<td>0.391</td>
+											</tr>
+											<tr>
+												<td>Russia</td>
+												<td>1990</td>
+												<td>oil</td>
+												<td>2525.518</td>
+												<td>0.352</td>
+											</tr>
+											<tr>
+												<td>Rwanda</td>
+												<td>2019</td>
+												<td>oil</td>
+												<td>1.187</td>
+												<td>0.837</td>
+											</tr>
+											<tr>
+												<td>Ryukyu Islands</td>
+												<td>1972</td>
+												<td>oil</td>
+												<td>9.005</td>
+												<td>0.986</td>
+											</tr>
+											<tr>
+												<td>Saint Helena</td>
+												<td>2016</td>
+												<td>oil</td>
+												<td>0.015</td>
+												<td>1</td>
+											</tr>
+											<tr>
+												<td>Saint Kitts and Nevis</td>
+												<td>2018</td>
+												<td>oil</td>
+												<td>0.245</td>
+												<td>1</td>
+											</tr>
+											<tr>
+												<td>Saint Lucia</td>
+												<td>2018</td>
+												<td>oil</td>
+												<td>0.509</td>
+												<td>1</td>
+											</tr>
+											<tr>
+												<td>Saint Pierre and Miquelon</td>
+												<td>1989</td>
+												<td>oil</td>
+												<td>0.103</td>
+												<td>1</td>
+											</tr>
+											<tr>
+												<td>Saint Pierre and Miquelon</td>
+												<td>1991</td>
+												<td>oil</td>
+												<td>0.103</td>
+												<td>1</td>
+											</tr>
+											<tr>
+												<td>Saint Vincent and the Grenadines</td>
+												<td>2009</td>
+												<td>oil</td>
+												<td>0.278</td>
+												<td>1</td>
+											</tr>
+											<tr>
+												<td>Samoa</td>
+												<td>2020</td>
+												<td>oil</td>
+												<td>0.246</td>
+												<td>1</td>
+											</tr>
+											<tr>
+												<td>Sao Tome and Principe</td>
+												<td>2018</td>
+												<td>oil</td>
+												<td>0.132</td>
+												<td>1</td>
+											</tr>
+											<tr>
+												<td>Saudi Arabia</td>
+												<td>2015</td>
+												<td>oil</td>
+												<td>674.878</td>
+												<td>0.615</td>
+											</tr>
+											<tr>
+												<td>Senegal</td>
+												<td>2018</td>
+												<td>oil</td>
+												<td>11.33</td>
+												<td>0.614</td>
+											</tr>
+											<tr>
+												<td>Serbia</td>
+												<td>2006</td>
+												<td>coal</td>
+												<td>60.838</td>
+												<td>0.659</td>
+											</tr>
+											<tr>
+												<td>Seychelles</td>
+												<td>2019</td>
+												<td>oil</td>
+												<td>0.581</td>
+												<td>1</td>
+											</tr>
+											<tr>
+												<td>Sierra Leone</td>
+												<td>2014</td>
+												<td>oil</td>
+												<td>1.11</td>
+												<td>1</td>
+											</tr>
+											<tr>
+												<td>Singapore</td>
+												<td>2009</td>
+												<td>oil</td>
+												<td>90.098</td>
+												<td>0.848</td>
+											</tr>
+											<tr>
+												<td>Sint Maarten (Dutch part)</td>
+												<td>1976</td>
+												<td>oil</td>
+												<td>2.098</td>
+												<td>1</td>
+											</tr>
+											<tr>
+												<td>Slovakia</td>
+												<td>1990</td>
+												<td>coal</td>
+												<td>61.475</td>
+												<td>0.547</td>
+											</tr>
+											<tr>
+												<td>Slovenia</td>
+												<td>2008</td>
+												<td>oil</td>
+												<td>18.25</td>
+												<td>0.481</td>
+											</tr>
+											<tr>
+												<td>Solomon Islands</td>
+												<td>2013</td>
+												<td>oil</td>
+												<td>0.374</td>
+												<td>1</td>
+											</tr>
+											<tr>
+												<td>Somalia</td>
+												<td>1988</td>
+												<td>oil</td>
+												<td>1.004</td>
+												<td>0.978</td>
+											</tr>
+											<tr>
+												<td>South Africa</td>
+												<td>2009</td>
+												<td>coal</td>
+												<td>502.259</td>
+												<td>0.822</td>
+											</tr>
+											<tr>
+												<td>South Korea</td>
+												<td>2018</td>
+												<td>coal</td>
+												<td>671.631</td>
+												<td>0.507</td>
+											</tr>
+											<tr>
+												<td>South Sudan</td>
+												<td>2015</td>
+												<td>oil</td>
+												<td>1.913</td>
+												<td>1</td>
+											</tr>
+											<tr>
+												<td>Spain</td>
+												<td>2005</td>
+												<td>oil</td>
+												<td>369.681</td>
+												<td>0.512</td>
+											</tr>
+											<tr>
+												<td>Sri Lanka</td>
+												<td>2017</td>
+												<td>oil</td>
+												<td>23.03</td>
+												<td>0.705</td>
+											</tr>
+											<tr>
+												<td>St. Kitts-Nevis-Anguilla</td>
+												<td>1980</td>
+												<td>oil</td>
+												<td>0.051</td>
+												<td>1</td>
+											</tr>
+											<tr>
+												<td>Sudan</td>
+												<td>2019</td>
+												<td>oil</td>
+												<td>22.031</td>
+												<td>0.929</td>
+											</tr>
+											<tr>
+												<td>Suriname</td>
+												<td>2014</td>
+												<td>oil</td>
+												<td>2.809</td>
+												<td>0.986</td>
+											</tr>
+											<tr>
+												<td>Sweden</td>
+												<td>1970</td>
+												<td>oil</td>
+												<td>92.287</td>
+												<td>0.902</td>
+											</tr>
+											<tr>
+												<td>Switzerland</td>
+												<td>1973</td>
+												<td>oil</td>
+												<td>46.203</td>
+												<td>0.904</td>
+											</tr>
+											<tr>
+												<td>Syria</td>
+												<td>2008</td>
+												<td>oil</td>
+												<td>66.877</td>
+												<td>0.791</td>
+											</tr>
+											<tr>
+												<td>Taiwan</td>
+												<td>2017</td>
+												<td>coal</td>
+												<td>284.812</td>
+												<td>0.577</td>
+											</tr>
+											<tr>
+												<td>Tajikistan</td>
+												<td>1985</td>
+												<td>oil</td>
+												<td>13.107</td>
+												<td>0.594</td>
+											</tr>
+											<tr>
+												<td>Tanzania</td>
+												<td>2019</td>
+												<td>oil</td>
+												<td>12.043</td>
+												<td>0.602</td>
+											</tr>
+											<tr>
+												<td>Thailand</td>
+												<td>2013</td>
+												<td>oil</td>
+												<td>287.598</td>
+												<td>0.417</td>
+											</tr>
+											<tr>
+												<td>Timor</td>
+												<td>2014</td>
+												<td>oil</td>
+												<td>0.608</td>
+												<td>0.844</td>
+											</tr>
+											<tr>
+												<td>Togo</td>
+												<td>2009</td>
+												<td>oil</td>
+												<td>2.741</td>
+												<td>0.801</td>
+											</tr>
+											<tr>
+												<td>Tonga</td>
+												<td>2017</td>
+												<td>oil</td>
+												<td>0.158</td>
+												<td>1</td>
+											</tr>
+											<tr>
+												<td>Trinidad and Tobago</td>
+												<td>2010</td>
+												<td>Gas</td>
+												<td>46.957</td>
+												<td>0.895</td>
+											</tr>
+											<tr>
+												<td>Tunisia</td>
+												<td>2019</td>
+												<td>oil</td>
+												<td>30.011</td>
+												<td>0.46</td>
+											</tr>
+											<tr>
+												<td>Turkey</td>
+												<td>2017</td>
+												<td>coal</td>
+												<td>425.329</td>
+												<td>0.371</td>
+											</tr>
+											<tr>
+												<td>Turkmenistan</td>
+												<td>2019</td>
+												<td>Gas</td>
+												<td>76.319</td>
+												<td>0.711</td>
+											</tr>
+											<tr>
+												<td>Turks and Caicos Islands</td>
+												<td>2018</td>
+												<td>oil</td>
+												<td>0.234</td>
+												<td>1</td>
+											</tr>
+											<tr>
+												<td>Tuvalu</td>
+												<td>1990</td>
+												<td>oil</td>
+												<td>0.011</td>
+												<td>1</td>
+											</tr>
+											<tr>
+												<td>Tuvalu</td>
+												<td>1995</td>
+												<td>oil</td>
+												<td>0.011</td>
+												<td>1</td>
+											</tr>
+											<tr>
+												<td>Tuvalu</td>
+												<td>1998</td>
+												<td>oil</td>
+												<td>0.011</td>
+												<td>1</td>
+											</tr>
+											<tr>
+												<td>Tuvalu</td>
+												<td>2001</td>
+												<td>oil</td>
+												<td>0.011</td>
+												<td>1</td>
+											</tr>
+											<tr>
+												<td>Tuvalu</td>
+												<td>2002</td>
+												<td>oil</td>
+												<td>0.011</td>
+												<td>1</td>
+											</tr>
+											<tr>
+												<td>Tuvalu</td>
+												<td>2003</td>
+												<td>oil</td>
+												<td>0.011</td>
+												<td>1</td>
+											</tr>
+											<tr>
+												<td>Tuvalu</td>
+												<td>2004</td>
+												<td>oil</td>
+												<td>0.011</td>
+												<td>1</td>
+											</tr>
+											<tr>
+												<td>Tuvalu</td>
+												<td>2006</td>
+												<td>oil</td>
+												<td>0.011</td>
+												<td>1</td>
+											</tr>
+											<tr>
+												<td>Tuvalu</td>
+												<td>2007</td>
+												<td>oil</td>
+												<td>0.011</td>
+												<td>1</td>
+											</tr>
+											<tr>
+												<td>Tuvalu</td>
+												<td>2008</td>
+												<td>oil</td>
+												<td>0.011</td>
+												<td>1</td>
+											</tr>
+											<tr>
+												<td>Tuvalu</td>
+												<td>2009</td>
+												<td>oil</td>
+												<td>0.011</td>
+												<td>1</td>
+											</tr>
+											<tr>
+												<td>Tuvalu</td>
+												<td>2010</td>
+												<td>oil</td>
+												<td>0.011</td>
+												<td>1</td>
+											</tr>
+											<tr>
+												<td>Tuvalu</td>
+												<td>2011</td>
+												<td>oil</td>
+												<td>0.011</td>
+												<td>1</td>
+											</tr>
+											<tr>
+												<td>Tuvalu</td>
+												<td>2012</td>
+												<td>oil</td>
+												<td>0.011</td>
+												<td>1</td>
+											</tr>
+											<tr>
+												<td>Tuvalu</td>
+												<td>2013</td>
+												<td>oil</td>
+												<td>0.011</td>
+												<td>1</td>
+											</tr>
+											<tr>
+												<td>Uganda</td>
+												<td>2019</td>
+												<td>oil</td>
+												<td>5.721</td>
+												<td>0.935</td>
+											</tr>
+											<tr>
+												<td>Ukraine</td>
+												<td>1985</td>
+												<td>coal</td>
+												<td>742.189</td>
+												<td>0.5</td>
+											</tr>
+											<tr>
+												<td>United Arab Emirates</td>
+												<td>2015</td>
+												<td>Gas</td>
+												<td>216.583</td>
+												<td>0.619</td>
+											</tr>
+											<tr>
+												<td>United Kingdom</td>
+												<td>1971</td>
+												<td>coal</td>
+												<td>660.388</td>
+												<td>0.517</td>
+											</tr>
+											<tr>
+												<td>United States</td>
+												<td>2005</td>
+												<td>oil</td>
+												<td>6134.521</td>
+												<td>0.425</td>
+											</tr>
+											<tr>
+												<td>Uruguay</td>
+												<td>2012</td>
+												<td>oil</td>
+												<td>8.592</td>
+												<td>0.947</td>
+											</tr>
+											<tr>
+												<td>Uzbekistan</td>
+												<td>2002</td>
+												<td>Gas</td>
+												<td>127.518</td>
+												<td>0.8</td>
+											</tr>
+											<tr>
+												<td>Vanuatu</td>
+												<td>2020</td>
+												<td>oil</td>
+												<td>0.182</td>
+												<td>1</td>
+											</tr>
+											<tr>
+												<td>Venezuela</td>
+												<td>2013</td>
+												<td>oil</td>
+												<td>207.425</td>
+												<td>0.618</td>
+											</tr>
+											<tr>
+												<td>Vietnam</td>
+												<td>2019</td>
+												<td>coal</td>
+												<td>260.312</td>
+												<td>0.476</td>
+											</tr>
+											<tr>
+												<td>Wallis and Futuna</td>
+												<td>2005</td>
+												<td>oil</td>
+												<td>0.029</td>
+												<td>1</td>
+											</tr>
+											<tr>
+												<td>Wallis and Futuna</td>
+												<td>2006</td>
+												<td>oil</td>
+												<td>0.029</td>
+												<td>1</td>
+											</tr>
+											<tr>
+												<td>Wallis and Futuna</td>
+												<td>2007</td>
+												<td>oil</td>
+												<td>0.029</td>
+												<td>1</td>
+											</tr>
+											<tr>
+												<td>Wallis and Futuna</td>
+												<td>2009</td>
+												<td>oil</td>
+												<td>0.029</td>
+												<td>1</td>
+											</tr>
+											<tr>
+												<td>Wallis and Futuna</td>
+												<td>2010</td>
+												<td>oil</td>
+												<td>0.029</td>
+												<td>1</td>
+											</tr>
+											<tr>
+												<td>Yemen</td>
+												<td>2013</td>
+												<td>oil</td>
+												<td>24.976</td>
+												<td>0.854</td>
+											</tr>
+											<tr>
+												<td>Zambia</td>
+												<td>2018</td>
+												<td>oil</td>
+												<td>7.313</td>
+												<td>0.479</td>
+											</tr>
+											<tr>
+												<td>Zimbabwe</td>
+												<td>1994</td>
+												<td>coal</td>
+												<td>17.394</td>
+												<td>0.779</td>
+											</tr>
+										</table>
+									</div>
+
+									<p>
+										&bullet; At a glance, it seems most countries' major source of CO<sub>2</sub> emission is oil-related. &#129300;
+									</p>
+
+									<hr class="major" />
+
+									<h2>Citations</h2>
+									<p>
+										Hannah Ritchie, Max Roser and Pablo Rosado (2020) - "CO₂ and Greenhouse Gas Emissions". 
+										Published online at OurWorldInData.org. Retrieved from: 'https://ourworldindata.org/co2-
+										and-other-greenhouse-gas-emissions' [Online Resource]
+									</p>
+
+								</section>
+
+						</div>
+					</div>
+
+				<!-- Sidebar -->
+				<div id="sidebar">
+					<div class="inner">
+
+						<!-- Search -->
+							<section id="search" class="alt">
+								<form method="post" action="#">
+									<input type="text" name="query" id="query" placeholder="Search" />
+								</form>
+							</section>
+
+						<!-- Menu -->
+							<nav id="menu">
+								<header class="major">
+									<h2>Menu</h2>
+								</header>
+								<ul>
+									<li><a href="../index.html">Homepage</a></li>
+									<li><a href="../resume.html" target="_blank">Resume</a></li>
+									<li><a href="../aboutme.html">About Me</a></li>
+									<li>
+										<span class="opener">Projects</span>
+										<ul>
+											<li><a href="./co2-emissions.html">CO<sub>2</sub> and GHG Emissions</a></li>
+											<li><a href="./bike-sales.html">Bike Sales</a></li>
+											<li><a href="./malenia.html">Elden Ring's Malenia</a></li>
+											<li><a href="./spotify-top-tracks.html">Spotify - Top Tracks</a></li>
+											<li><a href="./car-sales.html">Car Sales Dashboard</a></li>
+											<li><a href="./covid-19.html">COVID 19 Dashboard</a></li>
+											<li><a href="./indeed-webscraping.html">Indeed Jobs Web Scraping</a></li>
+											<li><a href="./video-games-sales.html">Video Game Sales</a></li>
+										</ul>
+									</li>
+									<li><a href="../hobbies.html">Hobbies</a></li>
+								</ul>
+							</nav>
+						
+						<!-- Section -->
+						<section>
+							<header class="major">
+								<h2>Get in touch</h2>
+							</header>
+							<p>
+								I generally reply to email inquiries within <strong>3-5 business days</strong>. The best time to reach me by phone
+								is <strong>between 11am and 5pm</strong> during weekdays. Feel free to leave a message on my voicemail if I'm temporarily
+								unreachable via phone call.
+							</p>
+							<ul class="contact">
+								<li class="icon solid fa-envelope"><a href="mailto: olivieryannick5@gmail.com">olivieryannick5@gmail.com</a></li>
+								<li class="icon solid fa-phone"><a href="tel: +1 (587) 987-2552">+1 (587) 987-2552</a></li>
+								<li class="icon solid fa-home">Edmonton, AB, Canada</li>
+							</ul>
+						</section>
+
+						<!-- Section -->
+							<section>
+								<header class="major">
+									<h2>Highlighted Posts</h2>
+								</header>
+								<div class="mini-posts">
+									<article>
+										<a href="./co2-emissions.html" class="image"><img src="https://user-images.githubusercontent.com/59672031/170327165-0c6f054f-0bd6-4a08-9cca-1af580a68691.png" alt="CO2 Emission Project" /></a>
+										<p>
+											CO<sub>2</sub> &amp; GHG Emissions Data Analysis
+										</p>
+									</article>
+									<article>
+										<a href="./projects/indeed-webscraping.html" class="image"><img src="https://user-images.githubusercontent.com/59672031/173158483-d7382d85-7c47-43fc-8784-62b820327028.png" alt="Indeed Job Web Scraping Project" /></a>
+										<p>
+											Indeed Job Web Scraping
+										</p>
+									</article>
+									<article>
+										<a href="./bike-sales.html" class="image"><img src="https://user-images.githubusercontent.com/59672031/170328973-72297f70-d93b-473d-b286-99e9e4d510f7.png" alt="Bike Sales Project" /></a>
+										<p>
+											Fictional Bike Sales Data Analysis
+										</p>
+									</article>
+									<article>
+										<a href="./spotify-top-tracks.html" class="image"><img src="https://public.tableau.com/static/images/Sp/SpotifyDashboard_16533472407880/SpotifyTopTracksDashboard/4_3.png" alt="" /></a>
+										<p>
+											Top Spotify Tracks Data Analysis
+										</p>
+									</article>
+								</div>
+							</section>
+
+						<!-- Footer -->
+							<footer id="footer">
+								<p class="copyright">Copyright &copy; 2022 Olivier's Portfolio. All rights reserved. Template by <a href="https://html5up.net">HTML5 UP</a>. Powered by <a href="https://www.github.com">Github Pages</a></p>
+							</footer>
+
+					</div>
+				</div>
+			<!-- end of sidebar -->
+
+			</div>
+
+		<!-- Scripts -->
+		<script src="../assets/js/jquery.min.js"></script>
+		<script src="../assets/js/browser.min.js"></script>
+		<script src="../assets/js/breakpoints.min.js"></script>
+		<script src="../assets/js/util.js"></script>
+		<script src="../assets/js/main.js"></script>
+
+	</body>
+</html>

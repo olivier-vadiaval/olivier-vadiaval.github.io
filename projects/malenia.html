@@ -1,0 +1,437 @@
+<!DOCTYPE HTML>
+<!--
+	Editorial by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+	<head>
+		<title>Defeats to Elden Ring's Malenia Analysis</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="../assets/css/main.css" />
+		<link rel="icon" type="image/x-icon" href="../images/favicon.png" />
+	</head>
+	<body class="is-preload">
+
+		<!-- Wrapper -->
+			<div id="wrapper">
+
+				<!-- Main -->
+					<div id="main">
+						<div class="inner">
+
+							<!-- Header -->
+							<header id="header">
+								<a href="../index.html" class="logo"><strong>Olivier's Portfolio</strong></a>
+								<ul class="icons">
+									<li><a href="https://www.linkedin.com/in/olivier-vadiavaloo" class="icon brands fa-linkedin" target="_blank"><span class="label">Linkedin</span></a></li>
+									<li><a href="https://github.com/olivier-vadiaval" class="icon brands fa-github" target="_blank"><span class="label">Github</span></a></li>
+									<li><a href="mailto: olivieryannick5@gmail.com" class="icon brands fa-google"><span class="label">Email</span class="label"></a></li>
+									<li><a href="https://www.kaggle.com/oliviervadiavaloo" class="icon brands fa-kaggle" target="_blank"><span class="label">Kaggle</span></a></li>
+								</ul>
+							</header>
+
+							<!-- Content -->
+								<section>
+									<header class="main">
+										<h1>Defeats To Elden Ring's Malenia Data Analysis</h1>
+									</header>
+
+									<span class="image main">
+										<figure id="opening-img">
+											<img src="https://user-images.githubusercontent.com/59672031/170190449-9ab866c4-6bbb-4211-9d34-47bc70ae4240.png"
+											alt="Malenia Project" />
+											<figcaption><br>Image: Defeats To Elden Ring's Malenia Dashboard, created using Power BI</figcaption>
+										</figure>
+									</span>
+
+									<p>
+										<strong>Technologies used:</strong> SQL Server (T-SQL), Excel, Power BI
+										<br>
+										<strong>Dashboard Files:</strong> 
+                                            <a href="https://github.com/olivier-vadiaval/malenia-DB-T-SQL/raw/main/malenia_dashboard.pbix">malenia_dashboard.pbix</a>, 
+                                            <a href="https://github.com/olivier-vadiaval/malenia-DB-T-SQL/raw/main/malenia_excel_dashboard.xlsx">malenia_excel_dashboard.xlsx</a>
+										<br>
+										<strong>Dataset:</strong> <a href="https://github.com/olivier-vadiaval/malenia-DB-T-SQL/raw/main/Malenia-DB.xls">Malenia-DB.xls</a>
+										<br>
+										<strong>T-SQL Queries:</strong> <a href="https://github.com/olivier-vadiaval/malenia-DB-T-SQL/blob/main/Malenia_Queries_1.sql" target="_blank">Malenia_Queries_1.sql</a>
+										<br>
+										<strong>Github:</strong> <a href="https://github.com/olivier-vadiaval/malenia-DB-T-SQL" target="_blank">malenia-DB-T-SQL</a>
+										<br>
+									</p>
+
+									<p>
+										<large><i>"I am Malenia. Blade of Miquella. And I have never known defeat."</i></large>
+                                        Be honest. How many times did you lose to Malenia?
+									</p>
+                                        
+									<p>
+										In case you are not too well acquainted with video games, Elden Ring is an action RPG developed by
+                                        FromSoftware. It was a highly anticipated game and arguably lived up to its hype, featuring iconic
+                                        boss fights - one of which is Malenia.
+									</p>
+
+                                    <p>
+                                        Malenia, Blade of Miquella. She's perhaps the most notorious boss in the game, owing to - you guessed it - how strong she is.
+                                        Both casual and more adept players could find themselves putting in an unbelievable amount of time in trying
+                                        to beat her. She has never known defeat after all.
+                                    </p>
+
+                                    <p>
+                                        In this project, I cleaned, queried and visualized a dataset (source: 
+                                        <a href="https://www.kaggle.com/datasets/jordancarlen/host-deaths-to-malenia-blade-of-miquella" target="_blank">Kaggle Datasets</a>)
+                                        about player deaths to Malenia. It comprises the players' location, health, minimum damage dealt and 
+                                        more, at the moment of demise. The data cleaning was accomplished using Microsoft Excel, the queries were written in T-SQL (SQL Server)
+                                        and the data's important aspect were visualized in dashboard built using Microsoft Power BI.
+                                    </p>
+
+									<hr class="major" />
+
+									<h2>Some queries...</h2>
+									<p>
+										See the full list of queries <a href="" target="_blank">here</a>.
+									</p>
+									<h4>Finding the player build with the highest min. damage dealt.</h4>
+									<p>
+										<strong>Input:</strong>
+<pre><code>SELECT TOP(1) Host_Build AS [Host Build with Most Min Damage], Min_Damage AS [Min Damage]
+FROM MaleniaDB..MaleniaDB
+ORDER BY Min_Damage DESC</code></pre>
+										<strong>Output:</strong>
+									</p>
+                                    <table>
+                                        <tr>
+                                            <td>Host Build with Most Min Damage</td>
+                                            <td>Min Damage</td>
+                                        </tr>
+                                        <tr>
+                                            <td>HYBRID</td>
+                                            <td>94</td>
+                                        </tr>
+                                    </table>
+									
+									<p>
+                                        &bullet; It seems like players not focusing on a specific build dealt the most min. damage to Malenia. 
+                                        Perhaps, having hybrid build provides flexibility and more opportunity to deal damage and survive longer.
+									</p>
+									
+									<hr class="major" />
+
+									<h4>Finding the level with the highest number of deaths for each player build.</h4>
+									<p>
+										<strong>Input:</strong>
+<pre>
+<code>WITH deaths_per_build AS (
+	SELECT Host_Build, [Level], COUNT(*) AS [No Of Deaths]
+	FROM MaleniaDB..MaleniaDB
+	GROUP BY Host_Build, [Level]
+)
+SELECT dpb1.Host_Build, dpb1.[Level] AS [Level With Most Deaths], dpb1.[No Of Deaths]
+FROM deaths_per_build dpb1
+WHERE dpb1.[No Of Deaths] = (
+	SELECT MAX(dpb2.[No Of Deaths])
+	FROM deaths_per_build dpb2
+	WHERE dpb1.Host_Build = dpb2.Host_Build
+)</code></pre>
+										<strong>Output:</strong>
+									</p>
+                                    <table>
+                                        <tr>
+                                            <td>Host_Build</td>
+                                            <td>Level With Most Deaths</td>
+                                            <td>No Of Deaths</td>
+                                        </tr>
+                                        <tr>
+                                            <td>RAW_MELEE</td>
+                                            <td>132</td>
+                                            <td>23</td>
+                                        </tr>
+                                        <tr>
+                                            <td>RAW_CAST</td>
+                                            <td>162</td>
+                                            <td>19</td>
+                                        </tr>
+                                        <tr>
+                                            <td>RAW_CAST</td>
+                                            <td>179</td>
+                                            <td>19</td>
+                                        </tr>
+                                        <tr>
+                                            <td>PROC_MELEE</td>
+                                            <td>120</td>
+                                            <td>21</td>
+                                        </tr>
+                                        <tr>
+                                            <td>PROC_MELEE</td>
+                                            <td>180</td>
+                                            <td>21</td>
+                                        </tr>
+                                        <tr>
+                                            <td>PROC_CAST</td>
+                                            <td>138</td>
+                                            <td>19</td>
+                                        </tr>
+                                        <tr>
+                                            <td>HYBRID</td>
+                                            <td>166</td>
+                                            <td>23</td>
+                                        </tr>
+                                    </table>
+
+									<p>
+                                       &bullet; Even experienced players lose numerous times with a hybrid build. &#129300; 
+									</p>
+
+									<hr class="major" />
+
+                                    <h4>
+                                        Finding the level with the most deaths, the location that yielded
+                                        the most deaths and if more than 50% of the players used a phantom
+                                        for each host build.
+                                    </h4>
+
+									<p>
+										<strong>Input:</strong>
+<div style="height: 30em; overflow: auto;" >
+<pre>
+<code>WITH host_level_deathcount AS (
+	SELECT Host_Build, [Level], COUNT(*) AS [Death Count]
+	FROM MaleniaDB..MaleniaDB
+	GROUP BY Host_Build, [Level]
+),
+host_level_most_deaths AS (
+	SELECT hld1.Host_Build, hld1.[Level], hld1.[Death Count]
+	FROM host_level_deathcount hld1
+	WHERE hld1.[Death Count] = (
+		SELECT MAX([Death Count])
+		FROM host_level_deathcount hld2
+		WHERE hld1.Host_Build = hld2.Host_Build
+	)
+),
+host_loc_deathcount AS (
+	SELECT Host_Build, [Location], COUNT(*) AS [Death Count]
+	FROM MaleniaDB..MaleniaDB
+	GROUP BY Host_Build, [Location]
+),
+host_loc_most_deaths AS (
+	SELECT hld1.Host_Build, hld1.[Location], hld1.[Death Count]
+	FROM host_loc_deathcount hld1
+	WHERE hld1.[Death Count] = (
+		SELECT MAX([Death Count])
+		FROM host_loc_deathcount hld2
+		WHERE hld1.Host_Build = hld2.Host_Build
+	)
+),
+host_deathcount AS (
+	SELECT Host_Build, 
+		   CAST(COUNT(*) AS FLOAT) AS Host_DeathCount
+	FROM MaleniaDB..MaleniaDB
+	GROUP BY Host_Build
+),
+host_phantuser_count AS (
+	SELECT Host_Build,
+		   CAST(COUNT(*) AS FLOAT) AS Phant_UserCount
+	FROM MaleniaDB..MaleniaDB
+	WHERE Phantom_Count = 2
+	GROUP BY Host_Build
+),
+host_ifmajor_phant AS (
+	SELECT hd.Host_Build,
+		   CASE 
+			WHEN (hpc.Phant_UserCount / hd.Host_DeathCount) > 0.5 THEN '>50% used a phantom'
+				 ELSE '>50% did NOT use a phantom'
+		   END AS [Mostly Used Phantom?]
+	FROM host_phantuser_count hpc INNER JOIN
+		 host_deathcount hd ON
+		 hpc.Host_Build = hd.Host_Build
+)
+SELECT level_md.Host_Build AS [Host Build],
+	   level_md.[Level] AS [Level(s) With Most Deaths],
+	   loc_md.[Location] AS [Location(s) With Most Deaths],
+	   maj_phant.[Mostly Used Phantom?]
+FROM host_level_most_deaths level_md INNER JOIN
+	 host_loc_most_deaths loc_md ON
+	 level_md.Host_Build = loc_md.Host_Build INNER JOIN
+	 host_ifmajor_phant maj_phant ON
+	 maj_phant.Host_Build = level_md.Host_Build</code></pre>
+</div>
+                                        <br>
+										<strong>Output:</strong>
+									</p>
+									<table>
+                                        <tr>
+                                            <td>Host Build</td>
+                                            <td>Level(s) With Most Deaths</td>
+                                            <td>Location(s) With Most Deaths</td>
+                                            <td>Mostly Used Phantom?</td>
+                                        </tr>
+                                        <tr>
+                                            <td>RAW_MELEE</td>
+                                            <td>132</td>
+                                            <td>CENTER</td>
+                                            <td>&gt;50% used a phantom</td>
+                                        </tr>
+                                        <tr>
+                                            <td>RAW_CAST</td>
+                                            <td>162</td>
+                                            <td>CENTER</td>
+                                            <td>&gt;50% used a phantom</td>
+                                        </tr>
+                                        <tr>
+                                            <td>RAW_CAST</td>
+                                            <td>179</td>
+                                            <td>CENTER</td>
+                                            <td>&gt;50% used a phantom</td>
+                                        </tr>
+                                        <tr>
+                                            <td>PROC_MELEE</td>
+                                            <td>120</td>
+                                            <td>CENTER</td>
+                                            <td>&gt;50% used a phantom</td>
+                                        </tr>
+                                        <tr>
+                                            <td>PROC_MELEE</td>
+                                            <td>180</td>
+                                            <td>CENTER</td>
+                                            <td>&gt;50% used a phantom</td>
+                                        </tr>
+                                        <tr>
+                                            <td>PROC_CAST</td>
+                                            <td>138</td>
+                                            <td>CENTER</td>
+                                            <td>&gt;50% used a phantom</td>
+                                        </tr>
+                                        <tr>
+                                            <td>HYBRID</td>
+                                            <td>166</td>
+                                            <td>OUTER</td>
+                                            <td>&gt;50% used a phantom</td>
+                                        </tr>
+                                    </table>
+
+									<p>
+                                        &bullet; For every host build, the majority of players used a phantom.
+                                        <br>
+                                        &bullet; Players with hybrid builds mostly died in the outer area of the arena.
+									</p>
+
+									<hr class="major" />
+
+									<h2>Citations</h2>
+									<p>
+										Jordan Carlen. 2022. Elden Ring: Deaths to Malenia, Blade of Miquella, Version 3. [Online Resource]
+									</p>
+
+								</section>
+
+						</div>
+					</div>
+
+				<!-- Sidebar -->
+				<div id="sidebar">
+					<div class="inner">
+
+						<!-- Search -->
+							<section id="search" class="alt">
+								<form method="post" action="#">
+									<input type="text" name="query" id="query" placeholder="Search" />
+								</form>
+							</section>
+
+						<!-- Menu -->
+							<nav id="menu">
+								<header class="major">
+									<h2>Menu</h2>
+								</header>
+								<ul>
+									<li><a href="../index.html">Homepage</a></li>
+									<li><a href="../resume.html" target="_blank">Resume</a></li>
+									<li><a href="../aboutme.html">About Me</a></li>
+									<li>
+										<span class="opener">Projects</span>
+										<ul>
+											<li><a href="./co2-emissions.html">CO<sub>2</sub> and GHG Emissions</a></li>
+											<li><a href="./bike-sales.html">Bike Sales</a></li>
+											<li><a href="./malenia.html">Elden Ring's Malenia</a></li>
+											<li><a href="./spotify-top-tracks.html">Spotify - Top Tracks</a></li>
+											<li><a href="./car-sales.html">Car Sales Dashboard</a></li>
+											<li><a href="./covid-19.html">COVID 19 Dashboard</a></li>
+											<li><a href="./indeed-webscraping.html">Indeed Jobs Web Scraping</a></li>
+											<li><a href="./video-games-sales.html">Video Game Sales</a></li>
+										</ul>
+									</li>
+									<li><a href="../hobbies.html">Hobbies</a></li>
+								</ul>
+							</nav>
+						
+						<!-- Section -->
+						<section>
+							<header class="major">
+								<h2>Get in touch</h2>
+							</header>
+							<p>
+								I generally reply to email inquiries within <strong>3-5 business days</strong>. The best time to reach me by phone
+								is <strong>between 11am and 5pm</strong> during weekdays. Feel free to leave a message on my voicemail if I'm temporarily
+								unreachable via phone call.
+							</p>
+							<ul class="contact">
+								<li class="icon solid fa-envelope"><a href="mailto: olivieryannick5@gmail.com">olivieryannick5@gmail.com</a></li>
+								<li class="icon solid fa-phone"><a href="tel: +1 (587) 987-2552">+1 (587) 987-2552</a></li>
+								<li class="icon solid fa-home">Edmonton, AB, Canada</li>
+							</ul>
+						</section>
+
+						<!-- Section -->
+							<section>
+								<header class="major">
+									<h2>Highlighted Posts</h2>
+								</header>
+								<div class="mini-posts">
+									<article>
+										<a href="./co2-emissions.html" class="image"><img src="https://user-images.githubusercontent.com/59672031/170327165-0c6f054f-0bd6-4a08-9cca-1af580a68691.png" alt="CO2 Emission Project" /></a>
+										<p>
+											CO<sub>2</sub> &amp; GHG Emissions Data Analysis
+										</p>
+									</article>
+									<article>
+										<a href="./projects/indeed-webscraping.html" class="image"><img src="https://user-images.githubusercontent.com/59672031/173158483-d7382d85-7c47-43fc-8784-62b820327028.png" alt="Indeed Job Web Scraping Project" /></a>
+										<p>
+											Indeed Job Web Scraping
+										</p>
+									</article>
+									<article>
+										<a href="./bike-sales.html" class="image"><img src="https://user-images.githubusercontent.com/59672031/170328973-72297f70-d93b-473d-b286-99e9e4d510f7.png" alt="Bike Sales Project" /></a>
+										<p>
+											Fictional Bike Sales Data Analysis
+										</p>
+									</article>
+									<article>
+										<a href="./spotify-top-tracks.html" class="image"><img src="https://public.tableau.com/static/images/Sp/SpotifyDashboard_16533472407880/SpotifyTopTracksDashboard/4_3.png" alt="" /></a>
+										<p>
+											Top Spotify Tracks Data Analysis
+										</p>
+									</article>
+								</div>
+							</section>
+
+						<!-- Footer -->
+							<footer id="footer">
+								<p class="copyright">Copyright &copy; 2022 Olivier's Portfolio. All rights reserved. Template by <a href="https://html5up.net">HTML5 UP</a>. Powered by <a href="https://www.github.com">Github Pages</a></p>
+							</footer>
+
+					</div>
+				</div>
+			<!-- end of sidebar -->
+
+			</div>
+
+		<!-- Scripts -->
+		<script src="../assets/js/jquery.min.js"></script>
+		<script src="../assets/js/browser.min.js"></script>
+		<script src="../assets/js/breakpoints.min.js"></script>
+		<script src="../assets/js/util.js"></script>
+		<script src="../assets/js/main.js"></script>
+
+	</body>
+</html>

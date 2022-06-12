@@ -1,0 +1,470 @@
+<!DOCTYPE HTML>
+<!--
+	Editorial by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+	<head>
+		<title>Bike Sales Analysis</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="../assets/css/main.css" />
+		<link rel="icon" type="image/x-icon" href="../images/favicon.png" />
+	</head>
+	<body class="is-preload">
+
+		<!-- Wrapper -->
+			<div id="wrapper">
+
+				<!-- Main -->
+					<div id="main">
+						<div class="inner">
+
+							<!-- Header -->
+							<header id="header">
+								<a href="../index.html" class="logo"><strong>Olivier's Portfolio</strong></a>
+								<ul class="icons">
+									<li><a href="https://www.linkedin.com/in/olivier-vadiavaloo" class="icon brands fa-linkedin" target="_blank"><span class="label">Linkedin</span></a></li>
+									<li><a href="https://github.com/olivier-vadiaval" class="icon brands fa-github" target="_blank"><span class="label">Github</span></a></li>
+									<li><a href="mailto: olivieryannick5@gmail.com" class="icon brands fa-google"><span class="label">Email</span class="label"></a></li>
+									<li><a href="https://www.kaggle.com/oliviervadiavaloo" class="icon brands fa-kaggle" target="_blank"><span class="label">Kaggle</span></a></li>
+								</ul>
+							</header>
+
+							<!-- Content -->
+								<section>
+									<header class="main">
+										<h1>Bike Sales Data Analysis</h1>
+									</header>
+
+									<span class="image main">
+										<figure id="opening-img">
+											<img src="https://user-images.githubusercontent.com/59672031/170190828-c28329e5-7148-4255-a2c6-10802421c096.png"
+											alt="Bike Sales Project" />
+											<figcaption><br>Image: Bike Sales Dashboard, created using Power BI</figcaption>
+										</figure>
+									</span>
+
+									<p>
+										<strong>Technologies used:</strong> SQL Server (T-SQL), Excel, Power BI
+										<br>
+										<strong>Dashboard File:</strong> <a href="https://github.com/olivier-vadiaval/bikesales-Queries/raw/main/bike_sales_dashboard.pbix">bike_sales_dashboard.pbix</a>
+										<br>
+										<strong>Dataset:</strong> <a href="https://github.com/olivier-vadiaval/bikesales-Queries/raw/main/BikeSales-DB.xlsx">BikeSales-DB.xlsx</a>
+										<br>
+										<strong>T-SQL Queries:</strong> <a href="https://github.com/olivier-vadiaval/bikesales-Queries/blob/main/Bike_Sales_Queries_1.sql" target="_blank">Bike_Sales_Queries_1.sql</a>
+										<br>
+										<strong>Github:</strong> <a href="https://github.com/olivier-vadiaval/bikesales-Queries" target="_blank">bikesales-Queries</a>
+										<br>
+									</p>
+
+									<p>
+										Biking is a fun activity. It is also enormously enjoyed as a means of commuting in countries such as the Netherlands.
+										The associated equipment can be grouped into roughly three categories: accessories, clothing and obviously, bikes. Which category
+										drives sales for biking equipment? How do equipment sales fluctuate within a year? How do sales vary by country?
+									</p>
+                                        
+									<p>
+										In this project, I analyse a fictional dataset (source: <a href="https://www.kaggle.com/datasets/sadiqshah/bike-sales-in-europe" target="_blank">Kaggle Datasets</a>)
+										about bike sales. The dataset is comprised of information such as order details, product names, revenue, profit and customers' age and gender. After cleaning 
+										the data in Microsoft Excel and examining it using T-SQL queries, I created a dashboard (<a href="#opening-img">see above</a>) in Microsoft Power BI to 
+										visualize and summarize its important aspects, such as the sum of profit, sum of revenue, the revenue by country and the like.
+									</p>
+
+									<hr class="major" />
+
+									<h2>Some queries...</h2>
+									<p>
+										See the full list of queries <a href="https://github.com/olivier-vadiaval/bikesales-Queries/blob/main/Bike_Sales_Queries_1.sql" target="_blank">here</a>.
+									</p>
+									<h4>Finding the net revenue by product category.</h4>
+									<p>
+										<strong>Input:</strong>
+<pre><code>SELECT Product_Category, SUM(Profit) AS [Net Revenue]
+FROM BikeSalesDB..bike_sales
+GROUP BY Product_Category</code></pre>
+										<strong>Output:</strong>
+									</p>
+
+									<table>
+										<tr>
+											<td>Product Category</td>
+											<td>Net Revenue (USD)</td>
+										</tr>
+										<tr>
+											<td>Clothing</td>
+											<td>2839319</td>
+										</tr>
+										<tr>
+											<td>Bikes</td>
+											<td>20399726</td>
+										</tr>
+										<tr>
+											<td>Accessories</td>
+											<td>8807194</td>
+										</tr>
+									</table>
+									
+									<p>
+										&bullet; Bikes seem to be the biggest source of revenue. &#129300; 
+									</p>
+									
+									<hr class="major" />
+
+									<h4>For each country, find the percentage of units sold for each category.</h4>
+									<p>
+										<strong>Input:</strong>
+<pre>
+<code>WITH sum_units_sold_coun_cat AS (
+	SELECT Country, SUM(Order_Quantity) AS Total_Sold
+	FROM BikeSalesDB..bike_sales
+	GROUP BY Country
+)
+SELECT bsales.Country, bsales.Product_Category, 
+		ROUND(SUM(bsales.Order_Quantity) / coun_cat.Total_Sold, 5) AS [Perc of Units Sold]
+FROM BikeSalesDB..bike_sales bsales INNER JOIN 
+		sum_units_sold_coun_cat coun_cat
+		ON bsales.Country = coun_cat.Country
+GROUP BY bsales.Country, bsales.Product_Category, coun_cat.Total_Sold
+ORDER BY 1, 2</code></pre>
+										<strong>Output:</strong>
+									</p>
+									<div style="height: 30em; overflow: auto;" >
+									<table>
+										<tr>
+											<td>Country</td>
+											<td>Product Category</td>
+											<td>Perc of Units Sold (%)</td>
+										</tr>
+										<tr>
+											<td>Australia</td>
+											<td>Accessories</td>
+											<td>0.76857</td>
+										</tr>
+										<tr>
+											<td>Australia</td>
+											<td>Bikes</td>
+											<td>0.03871</td>
+										</tr>
+										<tr>
+											<td>Australia</td>
+											<td>Clothing</td>
+											<td>0.19273</td>
+										</tr>
+										<tr>
+											<td>Canada</td>
+											<td>Accessories</td>
+											<td>0.79823</td>
+										</tr>
+										<tr>
+											<td>Canada</td>
+											<td>Bikes</td>
+											<td>0.01175</td>
+										</tr>
+										<tr>
+											<td>Canada</td>
+											<td>Clothing</td>
+											<td>0.19002</td>
+										</tr>
+										<tr>
+											<td>France</td>
+											<td>Accessories</td>
+											<td>0.7845</td>
+										</tr>
+										<tr>
+											<td>France</td>
+											<td>Bikes</td>
+											<td>0.02977</td>
+										</tr>
+										<tr>
+											<td>France</td>
+											<td>Clothing</td>
+											<td>0.18573</td>
+										</tr>
+										<tr>
+											<td>Germany</td>
+											<td>Accessories</td>
+											<td>0.78332</td>
+										</tr>
+										<tr>
+											<td>Germany</td>
+											<td>Bikes</td>
+											<td>0.0334</td>
+										</tr>
+										<tr>
+											<td>Germany</td>
+											<td>Clothing</td>
+											<td>0.18328</td>
+										</tr>
+										<tr>
+											<td>United Kingdom</td>
+											<td>Accessories</td>
+											<td>0.77653</td>
+										</tr>
+										<tr>
+											<td>United Kingdom</td>
+											<td>Bikes</td>
+											<td>0.03074</td>
+										</tr>
+										<tr>
+											<td>United Kingdom</td>
+											<td>Clothing</td>
+											<td>0.19273</td>
+										</tr>
+										<tr>
+											<td>United States</td>
+											<td>Accessories</td>
+											<td>0.78332</td>
+										</tr>
+										<tr>
+											<td>United States</td>
+											<td>Bikes</td>
+											<td>0.02341</td>
+										</tr>
+										<tr>
+											<td>United States</td>
+											<td>Clothing</td>
+											<td>0.19328</td>
+										</tr>
+									</table>
+									</div>
+
+									<br>
+									<p>
+										&bullet; Items from the "Accessories" category are the most sold items in every country - as expected. &#129335;
+										<br>
+										&bullet; Bikes constitue less than 10% of sales in every country.
+									</p>
+
+									<hr class="major" />
+
+									<h4>Finding the top 3 products in terms of revenue for each age group.</h4>
+
+									<p>
+										<strong>Input:</strong>
+<pre>
+<code>WITH product_rev_by_age AS (
+	SELECT Age_Group, Product, SUM(Revenue) AS Revenue
+	FROM BikeSalesDB..bike_sales
+	GROUP BY Age_Group, Product
+),
+top_three_prod AS (
+	SELECT Age_Group, Product, Revenue,
+			RANK() OVER (PARTITION BY Age_Group ORDER BY Revenue DESC) Rev_Rank
+	FROM product_rev_by_age
+)
+SELECT Age_Group AS [Age Group],
+		Product,
+		Rev_Rank AS [Revenue Rank],
+		Revenue
+FROM top_three_prod
+WHERE Rev_Rank < 4</code></pre>
+										<strong>Output:</strong>
+									</p>
+									<div style="height: 30em; overflow: auto;" >
+									<table>
+										<tr>
+											<td>Age Group</td>
+											<td>Product</td>
+											<td>Revenue Rank</td>
+											<td>Revenue (USD)</td>
+										</tr>
+										<tr>
+											<td>Adults (35-64)</td>
+											<td>Road-150 Red, 52</td>
+											<td>1</td>
+											<td>1707275</td>
+										</tr>
+										<tr>
+											<td>Adults (35-64)</td>
+											<td>Mountain-200 Silver, 42</td>
+											<td>2</td>
+											<td>1596139</td>
+										</tr>
+										<tr>
+											<td>Adults (35-64)</td>
+											<td>Mountain-200 Black, 42</td>
+											<td>3</td>
+											<td>1579925</td>
+										</tr>
+										<tr>
+											<td>Seniors (64+)</td>
+											<td>Mountain-100 Black, 48</td>
+											<td>1</td>
+											<td>19845</td>
+										</tr>
+										<tr>
+											<td>Seniors (64+)</td>
+											<td>Sport-100 Helmet, Blue</td>
+											<td>2</td>
+											<td>18501</td>
+										</tr>
+										<tr>
+											<td>Seniors (64+)</td>
+											<td>Sport-100 Helmet, Black</td>
+											<td>3</td>
+											<td>14456</td>
+										</tr>
+										<tr>
+											<td>Young Adults (25-34)</td>
+											<td>Road-150 Red, 62</td>
+											<td>1</td>
+											<td>1859098</td>
+										</tr>
+										<tr>
+											<td>Young Adults (25-34)</td>
+											<td>Mountain-200 Black, 38</td>
+											<td>2</td>
+											<td>1687197</td>
+										</tr>
+										<tr>
+											<td>Young Adults (25-34)</td>
+											<td>Road-150 Red, 56</td>
+											<td>3</td>
+											<td>1249804</td>
+										</tr>
+										<tr>
+											<td>Youth (&lt;25)</td>
+											<td>Road-150 Red, 62</td>
+											<td>1</td>
+											<td>602455</td>
+										</tr>
+										<tr>
+											<td>Youth (&lt;25)</td>
+											<td>Mountain-200 Silver, 42</td>
+											<td>2</td>
+											<td>583389</td>
+										</tr>
+										<tr>
+											<td>Youth (&lt;25)</td>
+											<td>Road-150 Red, 48</td>
+											<td>3</td>
+											<td>562870</td>
+										</tr>
+									</table>
+									</div>
+
+									<p>
+										&bullet; The Road-150 Red is present in the top 3 for all age groups, <strong>except</strong> for "Seniors (64+)".
+									</p>
+
+									<hr class="major" />
+
+									<h2>Citations</h2>
+									<p>
+										Sadiq Shah. 2020. Bike Sales in Europe, Version 1. [Online Resource]
+									</p>
+
+								</section>
+
+						</div>
+					</div>
+
+				<!-- Sidebar -->
+				<div id="sidebar">
+					<div class="inner">
+
+						<!-- Search -->
+							<section id="search" class="alt">
+								<form method="post" action="#">
+									<input type="text" name="query" id="query" placeholder="Search" />
+								</form>
+							</section>
+
+						<!-- Menu -->
+							<nav id="menu">
+								<header class="major">
+									<h2>Menu</h2>
+								</header>
+								<ul>
+									<li><a href="../index.html">Homepage</a></li>
+									<li><a href="../resume.html" target="_blank">Resume</a></li>
+									<li><a href="../aboutme.html">About Me</a></li>
+									<li>
+										<span class="opener">Projects</span>
+										<ul>
+											<li><a href="./co2-emissions.html">CO<sub>2</sub> and GHG Emissions</a></li>
+											<li><a href="./bike-sales.html">Bike Sales</a></li>
+											<li><a href="./malenia.html">Elden Ring's Malenia</a></li>
+											<li><a href="./spotify-top-tracks.html">Spotify - Top Tracks</a></li>
+											<li><a href="./car-sales.html">Car Sales Dashboard</a></li>
+											<li><a href="./covid-19.html">COVID 19 Dashboard</a></li>
+											<li><a href="./indeed-webscraping.html">Indeed Jobs Web Scraping</a></li>
+											<li><a href="./video-games-sales.html">Video Game Sales</a></li>
+										</ul>
+									</li>
+									<li><a href="../hobbies.html">Hobbies</a></li>
+								</ul>
+							</nav>
+						
+						<!-- Section -->
+						<section>
+							<header class="major">
+								<h2>Get in touch</h2>
+							</header>
+							<p>
+								I generally reply to email inquiries within <strong>3-5 business days</strong>. The best time to reach me by phone
+								is <strong>between 11am and 5pm</strong> during weekdays. Feel free to leave a message on my voicemail if I'm temporarily
+								unreachable via phone call.
+							</p>
+							<ul class="contact">
+								<li class="icon solid fa-envelope"><a href="mailto: olivieryannick5@gmail.com">olivieryannick5@gmail.com</a></li>
+								<li class="icon solid fa-phone"><a href="tel: +1 (587) 987-2552">+1 (587) 987-2552</a></li>
+								<li class="icon solid fa-home">Edmonton, AB, Canada</li>
+							</ul>
+						</section>
+
+						<!-- Section -->
+							<section>
+								<header class="major">
+									<h2>Highlighted Posts</h2>
+								</header>
+								<div class="mini-posts">
+									<article>
+										<a href="./co2-emissions.html" class="image"><img src="https://user-images.githubusercontent.com/59672031/170327165-0c6f054f-0bd6-4a08-9cca-1af580a68691.png" alt="CO2 Emission Project" /></a>
+										<p>
+											CO<sub>2</sub> &amp; GHG Emissions Data Analysis
+										</p>
+									</article>
+									<article>
+										<a href="./projects/indeed-webscraping.html" class="image"><img src="https://user-images.githubusercontent.com/59672031/173158483-d7382d85-7c47-43fc-8784-62b820327028.png" alt="Indeed Job Web Scraping Project" /></a>
+										<p>
+											Indeed Job Web Scraping
+										</p>
+									</article>
+									<article>
+										<a href="./bike-sales.html" class="image"><img src="https://user-images.githubusercontent.com/59672031/170328973-72297f70-d93b-473d-b286-99e9e4d510f7.png" alt="Bike Sales Project" /></a>
+										<p>
+											Fictional Bike Sales Data Analysis
+										</p>
+									</article>
+									<article>
+										<a href="./spotify-top-tracks.html" class="image"><img src="https://public.tableau.com/static/images/Sp/SpotifyDashboard_16533472407880/SpotifyTopTracksDashboard/4_3.png" alt="" /></a>
+										<p>
+											Top Spotify Tracks Data Analysis
+										</p>
+									</article>
+								</div>
+							</section>
+
+						<!-- Footer -->
+							<footer id="footer">
+								<p class="copyright">Copyright &copy; 2022 Olivier's Portfolio. All rights reserved. Template by <a href="https://html5up.net">HTML5 UP</a>. Powered by <a href="https://www.github.com">Github Pages</a></p>
+							</footer>
+
+					</div>
+				</div>
+			<!-- end of sidebar -->
+
+			</div>
+
+		<!-- Scripts -->
+		<script src="../assets/js/jquery.min.js"></script>
+		<script src="../assets/js/browser.min.js"></script>
+		<script src="../assets/js/breakpoints.min.js"></script>
+		<script src="../assets/js/util.js"></script>
+		<script src="../assets/js/main.js"></script>
+
+	</body>
+</html>

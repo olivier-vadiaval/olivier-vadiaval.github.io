@@ -1,0 +1,1237 @@
+<!DOCTYPE HTML>
+<!--
+	Editorial by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+	<head>
+		<title>Video Game Sales Analysis</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="../assets/css/main.css" />
+		<link rel="icon" type="image/x-icon" href="../images/favicon.png" />
+	</head>
+	<body class="is-preload">
+
+		<!-- Wrapper -->
+			<div id="wrapper">
+
+				<!-- Main -->
+					<div id="main">
+						<div class="inner">
+
+							<!-- Header -->
+							<header id="header">
+								<a href="../index.html" class="logo"><strong>Olivier's Portfolio</strong></a>
+								<ul class="icons">
+									<li><a href="https://www.linkedin.com/in/olivier-vadiavaloo" class="icon brands fa-linkedin" target="_blank"><span class="label">Linkedin</span></a></li>
+									<li><a href="https://github.com/olivier-vadiaval" class="icon brands fa-github" target="_blank"><span class="label">Github</span></a></li>
+									<li><a href="mailto: olivieryannick5@gmail.com" class="icon brands fa-google"><span class="label">Email</span class="label"></a></li>
+									<li><a href="https://www.kaggle.com/oliviervadiavaloo" class="icon brands fa-kaggle" target="_blank"><span class="label">Kaggle</span></a></li>
+								</ul>
+							</header>
+
+							<!-- Content -->
+								<section>
+									<header class="main">
+										<h1>Video Game Sales Data Analysis</h1>
+									</header>
+
+									<span class="image main">
+										<figure id="opening-img">
+											<img src="https://user-images.githubusercontent.com/59672031/173208980-12b8c0f2-2c25-482d-a49b-cf96ad238944.png"
+											alt="Video Game Sales Project" />
+											<figcaption><br>Image: Video Game Sales Dashboard, created using Power BI</figcaption>
+										</figure>
+									</span>
+
+									<p>
+										<strong>Technologies used:</strong> SQL Server (T-SQL), Excel, Power BI
+										<br>
+										<strong>Dashboard File:</strong> <a href="https://github.com/olivier-vadiaval/video-game-sales/raw/main/Video_Game_Sales.pbix">Video_Game_Sales.pbix</a>
+										<br>
+										<strong>Dataset:</strong> <a href="https://github.com/olivier-vadiaval/video-game-sales/raw/main/VideoGameSales-DB.xls">VideoGameSales-DB.xls</a>
+										<br>
+										<strong>T-SQL Queries:</strong> <a href="https://github.com/olivier-vadiaval/video-game-sales/blob/main/Video_Game_Sales_Queries.sql" target="_blank">Video_Game_Sales_Queries.sql</a>
+										<br>
+										<strong>Github:</strong> <a href="https://github.com/olivier-vadiaval/video-game-sales" target="_blank">video-game-sales</a>
+										<br>
+									</p>
+
+									<p>
+										The video game industry is a billion-dollar industry. Both the PC gaming market and 
+                                        the mobile gaming market generate billions in revenue each year and they will very likely
+                                        continue on this trend with the increasingly frequent improvements in the technology behind 
+                                        the development of video games.
+									</p>
+                                        
+									<p>
+										In this project, I analyse a dataset (source: <a href="https://www.kaggle.com/datasets/gregorut/videogamesales" target="_blank">Kaggle Datasets</a>)
+										about video game sales. After writing several T-SQL queries to examine the data and answer, I created a dashboard (<a href="#opening-img">
+                                        see above</a>) in Microsoft Power BI to visualize and summarize some of its important aspects.
+									</p>
+
+									<hr class="major" />
+
+									<h2>Some queries...</h2>
+									<p>
+										See the full list of queries <a href="https://github.com/olivier-vadiaval/video-game-sales/blob/main/Video_Game_Sales_Queries.sql" target="_blank">here</a>.
+									</p>
+									<h4>For each year, find the top-selling video game globally and the platform.</h4>
+									<p>
+										<strong>Input:</strong>
+<pre><code>WITH max_by_year AS (
+	SELECT [Year], MAX(vg2.[Global_Sales]) AS [Max_Sales]
+	FROM VideoGameSales..vgsales vg2
+	GROUP BY [Year]
+)
+SELECT vg1.[Year], 
+	   vg1.[Name] AS [Top-Selling Video Game], 
+	   vg1.[Platform], 
+	   vg1.[Global_Sales] AS [Copies sold in millions]
+FROM VideoGameSales..vgsales vg1 INNER JOIN
+	 max_by_year mby ON 
+	 mby.[Year] = vg1.[Year] AND
+	 mby.[Max_Sales] = vg1.[Global_Sales]
+ORDER BY vg1.[Year]</code></pre>
+										<strong>Output:</strong>
+									</p>
+
+									<div style="height: 30em; overflow: auto;" >
+									<table>
+                                        <tr>
+                                            <td>Year</td>
+                                            <td>Top-Selling Video Game</td>
+                                            <td>Platform</td>
+                                            <td>Copies sold in millions</td>
+                                        </tr>
+                                        <tr>
+                                            <td>1980</td>
+                                            <td>Asteroids</td>
+                                            <td>2600</td>
+                                            <td>4.31</td>
+                                        </tr>
+                                        <tr>
+                                            <td>1981</td>
+                                            <td>Pitfall!</td>
+                                            <td>2600</td>
+                                            <td>4.5</td>
+                                        </tr>
+                                        <tr>
+                                            <td>1982</td>
+                                            <td>Pac-Man</td>
+                                            <td>2600</td>
+                                            <td>7.81</td>
+                                        </tr>
+                                        <tr>
+                                            <td>1983</td>
+                                            <td>Baseball</td>
+                                            <td>NES</td>
+                                            <td>3.2</td>
+                                        </tr>
+                                        <tr>
+                                            <td>1984</td>
+                                            <td>Duck Hunt</td>
+                                            <td>NES</td>
+                                            <td>28.31</td>
+                                        </tr>
+                                        <tr>
+                                            <td>1985</td>
+                                            <td>Super Mario Bros.</td>
+                                            <td>NES</td>
+                                            <td>40.24</td>
+                                        </tr>
+                                        <tr>
+                                            <td>1986</td>
+                                            <td>The Legend of Zelda</td>
+                                            <td>NES</td>
+                                            <td>6.51</td>
+                                        </tr>
+                                        <tr>
+                                            <td>1987</td>
+                                            <td>Zelda II: The Adventure of Link</td>
+                                            <td>NES</td>
+                                            <td>4.38</td>
+                                        </tr>
+                                        <tr>
+                                            <td>1988</td>
+                                            <td>Super Mario Bros. 3</td>
+                                            <td>NES</td>
+                                            <td>17.28</td>
+                                        </tr>
+                                        <tr>
+                                            <td>1989</td>
+                                            <td>Tetris</td>
+                                            <td>GB</td>
+                                            <td>30.26</td>
+                                        </tr>
+                                        <tr>
+                                            <td>1990</td>
+                                            <td>Super Mario World</td>
+                                            <td>SNES</td>
+                                            <td>20.61</td>
+                                        </tr>
+                                        <tr>
+                                            <td>1991</td>
+                                            <td>The Legend of Zelda: A Link to the Past</td>
+                                            <td>SNES</td>
+                                            <td>4.61</td>
+                                        </tr>
+                                        <tr>
+                                            <td>1992</td>
+                                            <td>Super Mario Land 2: 6 Golden Coins</td>
+                                            <td>GB</td>
+                                            <td>11.18</td>
+                                        </tr>
+                                        <tr>
+                                            <td>1993</td>
+                                            <td>Super Mario All-Stars</td>
+                                            <td>SNES</td>
+                                            <td>10.55</td>
+                                        </tr>
+                                        <tr>
+                                            <td>1994</td>
+                                            <td>Donkey Kong Country</td>
+                                            <td>SNES</td>
+                                            <td>9.3</td>
+                                        </tr>
+                                        <tr>
+                                            <td>1995</td>
+                                            <td>Donkey Kong Country 2: Diddy's Kong Quest</td>
+                                            <td>SNES</td>
+                                            <td>5.15</td>
+                                        </tr>
+                                        <tr>
+                                            <td>1996</td>
+                                            <td>Pokemon Red/Pokemon Blue</td>
+                                            <td>GB</td>
+                                            <td>31.37</td>
+                                        </tr>
+                                        <tr>
+                                            <td>1997</td>
+                                            <td>Gran Turismo</td>
+                                            <td>PS</td>
+                                            <td>10.95</td>
+                                        </tr>
+                                        <tr>
+                                            <td>1998</td>
+                                            <td>PokÃ©mon Yellow: Special Pikachu Edition</td>
+                                            <td>GB</td>
+                                            <td>14.64</td>
+                                        </tr>
+                                        <tr>
+                                            <td>1999</td>
+                                            <td>Pokemon Gold/Pokemon Silver</td>
+                                            <td>GB</td>
+                                            <td>23.1</td>
+                                        </tr>
+                                        <tr>
+                                            <td>2000</td>
+                                            <td>PokÃ©mon Crystal Version</td>
+                                            <td>GB</td>
+                                            <td>6.39</td>
+                                        </tr>
+                                        <tr>
+                                            <td>2001</td>
+                                            <td>Gran Turismo 3: A-Spec</td>
+                                            <td>PS2</td>
+                                            <td>14.98</td>
+                                        </tr>
+                                        <tr>
+                                            <td>2002</td>
+                                            <td>Grand Theft Auto: Vice City</td>
+                                            <td>PS2</td>
+                                            <td>16.15</td>
+                                        </tr>
+                                        <tr>
+                                            <td>2003</td>
+                                            <td>Need for Speed Underground</td>
+                                            <td>PS2</td>
+                                            <td>7.2</td>
+                                        </tr>
+                                        <tr>
+                                            <td>2004</td>
+                                            <td>Grand Theft Auto: San Andreas</td>
+                                            <td>PS2</td>
+                                            <td>20.81</td>
+                                        </tr>
+                                        <tr>
+                                            <td>2005</td>
+                                            <td>Nintendogs</td>
+                                            <td>DS</td>
+                                            <td>24.76</td>
+                                        </tr>
+                                        <tr>
+                                            <td>2006</td>
+                                            <td>Wii Sports</td>
+                                            <td>Wii</td>
+                                            <td>82.74</td>
+                                        </tr>
+                                        <tr>
+                                            <td>2007</td>
+                                            <td>Wii Fit</td>
+                                            <td>Wii</td>
+                                            <td>22.72</td>
+                                        </tr>
+                                        <tr>
+                                            <td>2008</td>
+                                            <td>Mario Kart Wii</td>
+                                            <td>Wii</td>
+                                            <td>35.82</td>
+                                        </tr>
+                                        <tr>
+                                            <td>2009</td>
+                                            <td>Wii Sports Resort</td>
+                                            <td>Wii</td>
+                                            <td>33</td>
+                                        </tr>
+                                        <tr>
+                                            <td>2010</td>
+                                            <td>Kinect Adventures!</td>
+                                            <td>X360</td>
+                                            <td>21.82</td>
+                                        </tr>
+                                        <tr>
+                                            <td>2011</td>
+                                            <td>Call of Duty: Modern Warfare 3</td>
+                                            <td>X360</td>
+                                            <td>14.76</td>
+                                        </tr>
+                                        <tr>
+                                            <td>2012</td>
+                                            <td>Call of Duty: Black Ops II</td>
+                                            <td>PS3</td>
+                                            <td>14.03</td>
+                                        </tr>
+                                        <tr>
+                                            <td>2013</td>
+                                            <td>Grand Theft Auto V</td>
+                                            <td>PS3</td>
+                                            <td>21.4</td>
+                                        </tr>
+                                        <tr>
+                                            <td>2014</td>
+                                            <td>Grand Theft Auto V</td>
+                                            <td>PS4</td>
+                                            <td>11.98</td>
+                                        </tr>
+                                        <tr>
+                                            <td>2015</td>
+                                            <td>Call of Duty: Black Ops 3</td>
+                                            <td>PS4</td>
+                                            <td>14.24</td>
+                                        </tr>
+                                        <tr>
+                                            <td>2016</td>
+                                            <td>FIFA 17</td>
+                                            <td>PS4</td>
+                                            <td>4.77</td>
+                                        </tr>
+                                        <tr>
+                                            <td>2017</td>
+                                            <td>Phantasy Star Online 2 Episode 4: Deluxe Package</td>
+                                            <td>PS4</td>
+                                            <td>0.03</td>
+                                        </tr>
+                                        <tr>
+                                            <td>2020</td>
+                                            <td>Imagine: Makeup Artist</td>
+                                            <td>DS</td>
+                                            <td>0.29</td>
+                                        </tr>
+                                    </table>
+                                    </div>
+									
+									<hr class="major" />
+
+									<h4>Find the 10 platforms with the most sales worldwide for each year in the 21st century.</h4>
+									<p>
+										<strong>Input:</strong>
+<pre>
+<code>WITH sales_plat_yr AS (
+	SELECT [Year], [Platform],
+		   ROUND(SUM([Global_Sales]), 2) AS [Total_Sales]
+	FROM VideoGameSales..vgsales
+	WHERE [Year] >= 2000
+	GROUP BY [Year], [Platform]
+),
+max_by_year AS (
+	SELECT [Year], MAX([Total_Sales]) AS [Total_Sales]
+	FROM sales_plat_yr
+	GROUP BY [Year]
+)
+SELECT spy.[Year], spy.[Platform] AS [Top-Selling Platform],
+	   spy.[Total_Sales] AS [Copies Sold in millions]
+FROM sales_plat_yr spy INNER JOIN
+	 max_by_year mby ON
+	 mby.[Year] = spy.[Year] AND
+	 mby.[Total_Sales] = spy.[Total_Sales]
+ORDER BY 1</code></pre>
+										<strong>Output:</strong>
+									</p>
+									<div style="height: 30em; overflow: auto;" >
+                                    <table>
+                                        <tr>
+                                            <td>Year</td>
+                                            <td>Top-Selling Platform</td>
+                                            <td>Copies Sold in millions</td>
+                                        </tr>
+                                        <tr>
+                                            <td>2000</td>
+                                            <td>PS</td>
+                                            <td>96.28</td>
+                                        </tr>
+                                        <tr>
+                                            <td>2001</td>
+                                            <td>PS2</td>
+                                            <td>166.43</td>
+                                        </tr>
+                                        <tr>
+                                            <td>2002</td>
+                                            <td>PS2</td>
+                                            <td>205.4</td>
+                                        </tr>
+                                        <tr>
+                                            <td>2003</td>
+                                            <td>PS2</td>
+                                            <td>184.29</td>
+                                        </tr>
+                                        <tr>
+                                            <td>2004</td>
+                                            <td>PS2</td>
+                                            <td>211.78</td>
+                                        </tr>
+                                        <tr>
+                                            <td>2005</td>
+                                            <td>PS2</td>
+                                            <td>160.65</td>
+                                        </tr>
+                                        <tr>
+                                            <td>2006</td>
+                                            <td>Wii</td>
+                                            <td>137.91</td>
+                                        </tr>
+                                        <tr>
+                                            <td>2007</td>
+                                            <td>Wii</td>
+                                            <td>154.97</td>
+                                        </tr>
+                                        <tr>
+                                            <td>2008</td>
+                                            <td>Wii</td>
+                                            <td>174.16</td>
+                                        </tr>
+                                        <tr>
+                                            <td>2009</td>
+                                            <td>Wii</td>
+                                            <td>210.44</td>
+                                        </tr>
+                                        <tr>
+                                            <td>2010</td>
+                                            <td>X360</td>
+                                            <td>171.05</td>
+                                        </tr>
+                                        <tr>
+                                            <td>2011</td>
+                                            <td>PS3</td>
+                                            <td>159.37</td>
+                                        </tr>
+                                        <tr>
+                                            <td>2012</td>
+                                            <td>PS3</td>
+                                            <td>109.49</td>
+                                        </tr>
+                                        <tr>
+                                            <td>2013</td>
+                                            <td>PS3</td>
+                                            <td>117.39</td>
+                                        </tr>
+                                        <tr>
+                                            <td>2014</td>
+                                            <td>PS4</td>
+                                            <td>98.76</td>
+                                        </tr>
+                                        <tr>
+                                            <td>2015</td>
+                                            <td>PS4</td>
+                                            <td>115.3</td>
+                                        </tr>
+                                        <tr>
+                                            <td>2016</td>
+                                            <td>PS4</td>
+                                            <td>39.25</td>
+                                        </tr>
+                                        <tr>
+                                            <td>2017</td>
+                                            <td>PS4</td>
+                                            <td>0.03</td>
+                                        </tr>
+                                        <tr>
+                                            <td>2020</td>
+                                            <td>DS</td>
+                                            <td>0.29</td>
+                                        </tr>
+                                    </table>
+									</div>
+
+									<br>
+
+									<hr class="major" />
+
+									<h4>Find the number of copies sold every recorded year for each genre.</h4>
+
+									<p>
+										<strong>Input:</strong>
+<pre><code>DECLARE @answer NVARCHAR(MAX), @sql NVARCHAR(MAX);
+SET @answer = (
+    SELECT STRING_AGG('['+t1.[Genre]+']', ',')
+    FROM (
+        SELECT DISTINCT CONVERT(NVARCHAR(MAX), [Genre]) AS [Genre]
+        FROM VideoGameSales..vgsales
+    ) t1
+);
+
+SET @sql = 'SELECT *
+    FROM (
+        SELECT [Genre],
+                CONVERT(DECIMAL(9, 1), [Global_Sales]) AS [Global_Sales],
+                [Year]
+        FROM VideoGameSales..vgsales
+    ) base
+    PIVOT (
+        SUM([Global_Sales])
+        FOR Genre IN (
+            ' + @answer + '
+        )
+    ) [pivot_t]
+    WHERE [Year] IS NOT NULL
+    ORDER BY [Year]';
+
+EXEC(@sql);</code></pre>
+										<strong>Output:</strong>
+									</p>
+									<div style="height: 30em; overflow: auto;" >
+                                    <table>
+                                        <tr>
+                                            <td>Year</td>
+                                            <td>Puzzle</td>
+                                            <td>Shooter</td>
+                                            <td>Platform</td>
+                                            <td>Strategy</td>
+                                            <td>Misc</td>
+                                            <td>Adventure</td>
+                                            <td>Racing</td>
+                                            <td>Role-Playing</td>
+                                            <td>Fighting</td>
+                                            <td>Simulation</td>
+                                            <td>Action</td>
+                                            <td>Sports</td>
+                                        </tr>
+                                        <tr>
+                                            <td>1980</td>
+                                            <td>NULL</td>
+                                            <td>7.1</td>
+                                            <td>NULL</td>
+                                            <td>NULL</td>
+                                            <td>2.7</td>
+                                            <td>NULL</td>
+                                            <td>NULL</td>
+                                            <td>NULL</td>
+                                            <td>0.8</td>
+                                            <td>NULL</td>
+                                            <td>0.3</td>
+                                            <td>0.5</td>
+                                        </tr>
+                                        <tr>
+                                            <td>1981</td>
+                                            <td>2.2</td>
+                                            <td>10.0</td>
+                                            <td>7.0</td>
+                                            <td>NULL</td>
+                                            <td>NULL</td>
+                                            <td>NULL</td>
+                                            <td>0.5</td>
+                                            <td>NULL</td>
+                                            <td>NULL</td>
+                                            <td>0.5</td>
+                                            <td>14.9</td>
+                                            <td>0.8</td>
+                                        </tr>
+                                        <tr>
+                                            <td>1982</td>
+                                            <td>10.0</td>
+                                            <td>3.8</td>
+                                            <td>5.0</td>
+                                            <td>NULL</td>
+                                            <td>0.9</td>
+                                            <td>NULL</td>
+                                            <td>1.6</td>
+                                            <td>NULL</td>
+                                            <td>NULL</td>
+                                            <td>NULL</td>
+                                            <td>6.4</td>
+                                            <td>1.1</td>
+                                        </tr>
+                                        <tr>
+                                            <td>1983</td>
+                                            <td>0.8</td>
+                                            <td>0.5</td>
+                                            <td>6.9</td>
+                                            <td>NULL</td>
+                                            <td>2.1</td>
+                                            <td>0.4</td>
+                                            <td>NULL</td>
+                                            <td>NULL</td>
+                                            <td>NULL</td>
+                                            <td>NULL</td>
+                                            <td>2.9</td>
+                                            <td>3.2</td>
+                                        </tr>
+                                        <tr>
+                                            <td>1984</td>
+                                            <td>3.1</td>
+                                            <td>31.1</td>
+                                            <td>0.7</td>
+                                            <td>NULL</td>
+                                            <td>1.4</td>
+                                            <td>NULL</td>
+                                            <td>6.0</td>
+                                            <td>NULL</td>
+                                            <td>NULL</td>
+                                            <td>NULL</td>
+                                            <td>1.9</td>
+                                            <td>6.2</td>
+                                        </tr>
+                                        <tr>
+                                            <td>1985</td>
+                                            <td>3.2</td>
+                                            <td>1.0</td>
+                                            <td>43.1</td>
+                                            <td>NULL</td>
+                                            <td>NULL</td>
+                                            <td>NULL</td>
+                                            <td>NULL</td>
+                                            <td>NULL</td>
+                                            <td>1.1</td>
+                                            <td>0.0</td>
+                                            <td>3.5</td>
+                                            <td>2.0</td>
+                                        </tr>
+                                        <tr>
+                                            <td>1986</td>
+                                            <td>NULL</td>
+                                            <td>4.0</td>
+                                            <td>9.4</td>
+                                            <td>NULL</td>
+                                            <td>NULL</td>
+                                            <td>NULL</td>
+                                            <td>2.0</td>
+                                            <td>2.5</td>
+                                            <td>NULL</td>
+                                            <td>NULL</td>
+                                            <td>13.6</td>
+                                            <td>5.6</td>
+                                        </tr>
+                                        <tr>
+                                            <td>1987</td>
+                                            <td>NULL</td>
+                                            <td>0.8</td>
+                                            <td>1.7</td>
+                                            <td>NULL</td>
+                                            <td>NULL</td>
+                                            <td>4.4</td>
+                                            <td>NULL</td>
+                                            <td>4.7</td>
+                                            <td>5.4</td>
+                                            <td>NULL</td>
+                                            <td>1.2</td>
+                                            <td>3.7</td>
+                                        </tr>
+                                        <tr>
+                                            <td>1988</td>
+                                            <td>5.6</td>
+                                            <td>0.5</td>
+                                            <td>27.8</td>
+                                            <td>NULL</td>
+                                            <td>NULL</td>
+                                            <td>NULL</td>
+                                            <td>2.1</td>
+                                            <td>6.0</td>
+                                            <td>NULL</td>
+                                            <td>0.0</td>
+                                            <td>1.7</td>
+                                            <td>3.6</td>
+                                        </tr>
+                                        <tr>
+                                            <td>1989</td>
+                                            <td>37.7</td>
+                                            <td>1.2</td>
+                                            <td>20.6</td>
+                                            <td>NULL</td>
+                                            <td>1.3</td>
+                                            <td>NULL</td>
+                                            <td>NULL</td>
+                                            <td>2.2</td>
+                                            <td>NULL</td>
+                                            <td>NULL</td>
+                                            <td>4.7</td>
+                                            <td>5.7</td>
+                                        </tr>
+                                        <tr>
+                                            <td>1990</td>
+                                            <td>5.9</td>
+                                            <td>NULL</td>
+                                            <td>23.0</td>
+                                            <td>NULL</td>
+                                            <td>NULL</td>
+                                            <td>NULL</td>
+                                            <td>6.3</td>
+                                            <td>4.5</td>
+                                            <td>NULL</td>
+                                            <td>1.1</td>
+                                            <td>6.4</td>
+                                            <td>2.1</td>
+                                        </tr>
+                                        <tr>
+                                            <td>1991</td>
+                                            <td>3.2</td>
+                                            <td>1.9</td>
+                                            <td>7.6</td>
+                                            <td>1.0</td>
+                                            <td>0.1</td>
+                                            <td>2.3</td>
+                                            <td>1.1</td>
+                                            <td>3.4</td>
+                                            <td>0.4</td>
+                                            <td>2.2</td>
+                                            <td>6.8</td>
+                                            <td>2.4</td>
+                                        </tr>
+                                        <tr>
+                                            <td>1992</td>
+                                            <td>4.8</td>
+                                            <td>0.2</td>
+                                            <td>13.3</td>
+                                            <td>0.4</td>
+                                            <td>5.0</td>
+                                            <td>12.3</td>
+                                            <td>9.1</td>
+                                            <td>7.0</td>
+                                            <td>15.4</td>
+                                            <td>2.1</td>
+                                            <td>3.8</td>
+                                            <td>3.0</td>
+                                        </tr>
+                                        <tr>
+                                            <td>1993</td>
+                                            <td>3.2</td>
+                                            <td>3.1</td>
+                                            <td>19.0</td>
+                                            <td>0.8</td>
+                                            <td>0.4</td>
+                                            <td>0.1</td>
+                                            <td>0.3</td>
+                                            <td>5.6</td>
+                                            <td>8.7</td>
+                                            <td>0.2</td>
+                                            <td>1.9</td>
+                                            <td>3.2</td>
+                                        </tr>
+                                        <tr>
+                                            <td>1994</td>
+                                            <td>1.5</td>
+                                            <td>8.4</td>
+                                            <td>28.8</td>
+                                            <td>3.6</td>
+                                            <td>3.0</td>
+                                            <td>3.8</td>
+                                            <td>2.4</td>
+                                            <td>7.1</td>
+                                            <td>8.5</td>
+                                            <td>2.8</td>
+                                            <td>1.5</td>
+                                            <td>8.5</td>
+                                        </tr>
+                                        <tr>
+                                            <td>1995</td>
+                                            <td>2.9</td>
+                                            <td>4.3</td>
+                                            <td>16.8</td>
+                                            <td>6.4</td>
+                                            <td>6.3</td>
+                                            <td>0.8</td>
+                                            <td>6.2</td>
+                                            <td>14.3</td>
+                                            <td>14.8</td>
+                                            <td>4.2</td>
+                                            <td>3.6</td>
+                                            <td>7.9</td>
+                                        </tr>
+                                        <tr>
+                                            <td>1996</td>
+                                            <td>3.7</td>
+                                            <td>7.1</td>
+                                            <td>28.3</td>
+                                            <td>5.7</td>
+                                            <td>10.5</td>
+                                            <td>4.1</td>
+                                            <td>28.4</td>
+                                            <td>43.9</td>
+                                            <td>18.0</td>
+                                            <td>11.4</td>
+                                            <td>20.4</td>
+                                            <td>17.6</td>
+                                        </tr>
+                                        <tr>
+                                            <td>1997</td>
+                                            <td>5.8</td>
+                                            <td>22.0</td>
+                                            <td>22.1</td>
+                                            <td>7.5</td>
+                                            <td>5.5</td>
+                                            <td>4.8</td>
+                                            <td>32.1</td>
+                                            <td>21.7</td>
+                                            <td>11.8</td>
+                                            <td>9.6</td>
+                                            <td>27.6</td>
+                                            <td>30.3</td>
+                                        </tr>
+                                        <tr>
+                                            <td>1998</td>
+                                            <td>6.3</td>
+                                            <td>9.9</td>
+                                            <td>29.7</td>
+                                            <td>13.5</td>
+                                            <td>12.1</td>
+                                            <td>9.0</td>
+                                            <td>28.0</td>
+                                            <td>28.2</td>
+                                            <td>31.9</td>
+                                            <td>7.2</td>
+                                            <td>39.3</td>
+                                            <td>42.6</td>
+                                        </tr>
+                                        <tr>
+                                            <td>1999</td>
+                                            <td>1.2</td>
+                                            <td>12.4</td>
+                                            <td>20.6</td>
+                                            <td>18.6</td>
+                                            <td>20.6</td>
+                                            <td>7.5</td>
+                                            <td>37.3</td>
+                                            <td>49.4</td>
+                                            <td>14.3</td>
+                                            <td>11.4</td>
+                                            <td>27.9</td>
+                                            <td>30.5</td>
+                                        </tr>
+                                        <tr>
+                                            <td>2000</td>
+                                            <td>3.7</td>
+                                            <td>6.9</td>
+                                            <td>16.1</td>
+                                            <td>8.5</td>
+                                            <td>15.6</td>
+                                            <td>3.1</td>
+                                            <td>20.3</td>
+                                            <td>29.1</td>
+                                            <td>20.1</td>
+                                            <td>3.5</td>
+                                            <td>34.1</td>
+                                            <td>41.6</td>
+                                        </tr>
+                                        <tr>
+                                            <td>2001</td>
+                                            <td>8.1</td>
+                                            <td>25.0</td>
+                                            <td>39.3</td>
+                                            <td>7.5</td>
+                                            <td>16.3</td>
+                                            <td>9.2</td>
+                                            <td>55.7</td>
+                                            <td>22.4</td>
+                                            <td>18.3</td>
+                                            <td>19.4</td>
+                                            <td>59.3</td>
+                                            <td>51.6</td>
+                                        </tr>
+                                        <tr>
+                                            <td>2002</td>
+                                            <td>5.6</td>
+                                            <td>48.3</td>
+                                            <td>46.3</td>
+                                            <td>5.7</td>
+                                            <td>15.8</td>
+                                            <td>11.2</td>
+                                            <td>30.5</td>
+                                            <td>45.5</td>
+                                            <td>25.0</td>
+                                            <td>10.9</td>
+                                            <td>86.8</td>
+                                            <td>65.3</td>
+                                        </tr>
+                                        <tr>
+                                            <td>2003</td>
+                                            <td>2.4</td>
+                                            <td>26.5</td>
+                                            <td>42.8</td>
+                                            <td>7.9</td>
+                                            <td>24.0</td>
+                                            <td>2.2</td>
+                                            <td>51.9</td>
+                                            <td>30.5</td>
+                                            <td>23.7</td>
+                                            <td>21.4</td>
+                                            <td>67.7</td>
+                                            <td>56.4</td>
+                                        </tr>
+                                        <tr>
+                                            <td>2004</td>
+                                            <td>8.5</td>
+                                            <td>46.9</td>
+                                            <td>46.7</td>
+                                            <td>7.5</td>
+                                            <td>31.3</td>
+                                            <td>8.6</td>
+                                            <td>47.9</td>
+                                            <td>54.0</td>
+                                            <td>16.8</td>
+                                            <td>10.9</td>
+                                            <td>76.4</td>
+                                            <td>64.0</td>
+                                        </tr>
+                                        <tr>
+                                            <td>2005</td>
+                                            <td>20.3</td>
+                                            <td>42.1</td>
+                                            <td>23.6</td>
+                                            <td>5.3</td>
+                                            <td>61.1</td>
+                                            <td>8.4</td>
+                                            <td>56.4</td>
+                                            <td>28.4</td>
+                                            <td>19.9</td>
+                                            <td>49.4</td>
+                                            <td>85.4</td>
+                                            <td>59.0</td>
+                                        </tr>
+                                        <tr>
+                                            <td>2006</td>
+                                            <td>10.8</td>
+                                            <td>38.1</td>
+                                            <td>49.8</td>
+                                            <td>4.1</td>
+                                            <td>67.2</td>
+                                            <td>11.1</td>
+                                            <td>33.9</td>
+                                            <td>57.5</td>
+                                            <td>22.6</td>
+                                            <td>21.3</td>
+                                            <td>66.6</td>
+                                            <td>135.8</td>
+                                        </tr>
+                                        <tr>
+                                            <td>2007</td>
+                                            <td>23.9</td>
+                                            <td>70.8</td>
+                                            <td>35.9</td>
+                                            <td>9.3</td>
+                                            <td>91.9</td>
+                                            <td>24.3</td>
+                                            <td>38.7</td>
+                                            <td>44.1</td>
+                                            <td>17.6</td>
+                                            <td>49.0</td>
+                                            <td>106.2</td>
+                                            <td>98.5</td>
+                                        </tr>
+                                        <tr>
+                                            <td>2008</td>
+                                            <td>15.5</td>
+                                            <td>59.5</td>
+                                            <td>36.2</td>
+                                            <td>11.8</td>
+                                            <td>86.7</td>
+                                            <td>24.7</td>
+                                            <td>70.6</td>
+                                            <td>59.6</td>
+                                            <td>35.8</td>
+                                            <td>46.5</td>
+                                            <td>137.0</td>
+                                            <td>95.6</td>
+                                        </tr>
+                                        <tr>
+                                            <td>2009</td>
+                                            <td>19.9</td>
+                                            <td>69.6</td>
+                                            <td>40.9</td>
+                                            <td>12.2</td>
+                                            <td>77.3</td>
+                                            <td>19.9</td>
+                                            <td>33.8</td>
+                                            <td>47.7</td>
+                                            <td>32.5</td>
+                                            <td>33.7</td>
+                                            <td>139.1</td>
+                                            <td>138.9</td>
+                                        </tr>
+                                        <tr>
+                                            <td>2010</td>
+                                            <td>11.1</td>
+                                            <td>77.6</td>
+                                            <td>32.0</td>
+                                            <td>13.4</td>
+                                            <td>96.7</td>
+                                            <td>15.6</td>
+                                            <td>34.9</td>
+                                            <td>69.4</td>
+                                            <td>15.1</td>
+                                            <td>22.4</td>
+                                            <td>118.1</td>
+                                            <td>92.4</td>
+                                        </tr>
+                                        <tr>
+                                            <td>2011</td>
+                                            <td>5.0</td>
+                                            <td>99.0</td>
+                                            <td>27.8</td>
+                                            <td>9.0</td>
+                                            <td>55.8</td>
+                                            <td>14.9</td>
+                                            <td>34.8</td>
+                                            <td>53.3</td>
+                                            <td>22.5</td>
+                                            <td>15.4</td>
+                                            <td>118.5</td>
+                                            <td>57.4</td>
+                                        </tr>
+                                        <tr>
+                                            <td>2012</td>
+                                            <td>1.7</td>
+                                            <td>73.0</td>
+                                            <td>18.4</td>
+                                            <td>3.2</td>
+                                            <td>22.9</td>
+                                            <td>5.6</td>
+                                            <td>14.4</td>
+                                            <td>48.3</td>
+                                            <td>9.4</td>
+                                            <td>13.5</td>
+                                            <td>121.3</td>
+                                            <td>31.1</td>
+                                        </tr>
+                                        <tr>
+                                            <td>2013</td>
+                                            <td>1.0</td>
+                                            <td>62.7</td>
+                                            <td>25.5</td>
+                                            <td>6.3</td>
+                                            <td>25.9</td>
+                                            <td>6.3</td>
+                                            <td>13.1</td>
+                                            <td>44.9</td>
+                                            <td>7.3</td>
+                                            <td>8.6</td>
+                                            <td>125.1</td>
+                                            <td>41.5</td>
+                                        </tr>
+                                        <tr>
+                                            <td>2014</td>
+                                            <td>1.5</td>
+                                            <td>66.0</td>
+                                            <td>8.9</td>
+                                            <td>1.1</td>
+                                            <td>23.6</td>
+                                            <td>5.7</td>
+                                            <td>16.7</td>
+                                            <td>45.9</td>
+                                            <td>16.3</td>
+                                            <td>5.5</td>
+                                            <td>99.3</td>
+                                            <td>46.6</td>
+                                        </tr>
+                                        <tr>
+                                            <td>2015</td>
+                                            <td>0.7</td>
+                                            <td>66.1</td>
+                                            <td>6.0</td>
+                                            <td>1.7</td>
+                                            <td>11.6</td>
+                                            <td>7.9</td>
+                                            <td>7.9</td>
+                                            <td>36.7</td>
+                                            <td>7.8</td>
+                                            <td>5.4</td>
+                                            <td>69.6</td>
+                                            <td>41.9</td>
+                                        </tr>
+                                        <tr>
+                                            <td>2016</td>
+                                            <td>NULL</td>
+                                            <td>18.0</td>
+                                            <td>2.1</td>
+                                            <td>0.4</td>
+                                            <td>0.9</td>
+                                            <td>1.4</td>
+                                            <td>1.6</td>
+                                            <td>6.6</td>
+                                            <td>3.9</td>
+                                            <td>0.3</td>
+                                            <td>18.9</td>
+                                            <td>14.6</td>
+                                        </tr>
+                                        <tr>
+                                            <td>2017</td>
+                                            <td>NULL</td>
+                                            <td>NULL</td>
+                                            <td>NULL</td>
+                                            <td>NULL</td>
+                                            <td>NULL</td>
+                                            <td>NULL</td>
+                                            <td>NULL</td>
+                                            <td>0.0</td>
+                                            <td>NULL</td>
+                                            <td>NULL</td>
+                                            <td>0.0</td>
+                                            <td>NULL</td>
+                                        </tr>
+                                        <tr>
+                                            <td>2020</td>
+                                            <td>NULL</td>
+                                            <td>NULL</td>
+                                            <td>NULL</td>
+                                            <td>NULL</td>
+                                            <td>NULL</td>
+                                            <td>NULL</td>
+                                            <td>NULL</td>
+                                            <td>NULL</td>
+                                            <td>NULL</td>
+                                            <td>0.3</td>
+                                            <td>NULL</td>
+                                            <td>NULL</td>
+                                        </tr>
+                                    </table>
+									</div>
+
+									<hr class="major" />
+
+									<h2>Citations</h2>
+									<p>
+                                        Gregory Smith. 2018. Video Game Sales, Version 2. [Online Resource]
+									</p>
+
+								</section>
+
+						</div>
+					</div>
+
+				<!-- Sidebar -->
+				<div id="sidebar">
+					<div class="inner">
+
+						<!-- Search -->
+							<section id="search" class="alt">
+								<form method="post" action="#">
+									<input type="text" name="query" id="query" placeholder="Search" />
+								</form>
+							</section>
+
+						<!-- Menu -->
+							<nav id="menu">
+								<header class="major">
+									<h2>Menu</h2>
+								</header>
+								<ul>
+									<li><a href="../index.html">Homepage</a></li>
+									<li><a href="../resume.html" target="_blank">Resume</a></li>
+									<li><a href="../aboutme.html">About Me</a></li>
+									<li>
+										<span class="opener">Projects</span>
+										<ul>
+											<li><a href="./co2-emissions.html">CO<sub>2</sub> and GHG Emissions</a></li>
+											<li><a href="./bike-sales.html">Bike Sales</a></li>
+											<li><a href="./malenia.html">Elden Ring's Malenia</a></li>
+											<li><a href="./spotify-top-tracks.html">Spotify - Top Tracks</a></li>
+											<li><a href="./car-sales.html">Car Sales Dashboard</a></li>
+											<li><a href="./covid-19.html">COVID 19 Dashboard</a></li>
+											<li><a href="./indeed-webscraping.html">Indeed Jobs Web Scraping</a></li>
+											<li><a href="./video-games-sales.html">Video Game Sales</a></li>
+										</ul>
+									</li>
+									<li><a href="../hobbies.html">Hobbies</a></li>
+								</ul>
+							</nav>
+						
+						<!-- Section -->
+						<section>
+							<header class="major">
+								<h2>Get in touch</h2>
+							</header>
+							<p>
+								I generally reply to email inquiries within <strong>3-5 business days</strong>. The best time to reach me by phone
+								is <strong>between 11am and 5pm</strong> during weekdays. Feel free to leave a message on my voicemail if I'm temporarily
+								unreachable via phone call.
+							</p>
+							<ul class="contact">
+								<li class="icon solid fa-envelope"><a href="mailto: olivieryannick5@gmail.com">olivieryannick5@gmail.com</a></li>
+								<li class="icon solid fa-phone"><a href="tel: +1 (587) 987-2552">+1 (587) 987-2552</a></li>
+								<li class="icon solid fa-home">Edmonton, AB, Canada</li>
+							</ul>
+						</section>
+
+						<!-- Section -->
+							<section>
+								<header class="major">
+									<h2>Highlighted Posts</h2>
+								</header>
+								<div class="mini-posts">
+									<article>
+										<a href="./co2-emissions.html" class="image"><img src="https://user-images.githubusercontent.com/59672031/170327165-0c6f054f-0bd6-4a08-9cca-1af580a68691.png" alt="CO2 Emission Project" /></a>
+										<p>
+											CO<sub>2</sub> &amp; GHG Emissions Data Analysis
+										</p>
+									</article>
+									<article>
+										<a href="./projects/indeed-webscraping.html" class="image"><img src="https://user-images.githubusercontent.com/59672031/173158483-d7382d85-7c47-43fc-8784-62b820327028.png" alt="Indeed Job Web Scraping Project" /></a>
+										<p>
+											Indeed Job Web Scraping
+										</p>
+									</article>
+									<article>
+										<a href="./bike-sales.html" class="image"><img src="https://user-images.githubusercontent.com/59672031/170328973-72297f70-d93b-473d-b286-99e9e4d510f7.png" alt="Bike Sales Project" /></a>
+										<p>
+											Fictional Bike Sales Data Analysis
+										</p>
+									</article>
+									<article>
+										<a href="./spotify-top-tracks.html" class="image"><img src="https://public.tableau.com/static/images/Sp/SpotifyDashboard_16533472407880/SpotifyTopTracksDashboard/4_3.png" alt="" /></a>
+										<p>
+											Top Spotify Tracks Data Analysis
+										</p>
+									</article>
+								</div>
+							</section>
+
+						<!-- Footer -->
+							<footer id="footer">
+								<p class="copyright">Copyright &copy; 2022 Olivier's Portfolio. All rights reserved. Template by <a href="https://html5up.net">HTML5 UP</a>. Powered by <a href="https://www.github.com">Github Pages</a></p>
+							</footer>
+
+					</div>
+				</div>
+			<!-- end of sidebar -->
+
+			</div>
+
+		<!-- Scripts -->
+		<script src="../assets/js/jquery.min.js"></script>
+		<script src="../assets/js/browser.min.js"></script>
+		<script src="../assets/js/breakpoints.min.js"></script>
+		<script src="../assets/js/util.js"></script>
+		<script src="../assets/js/main.js"></script>
+
+	</body>
+</html>
